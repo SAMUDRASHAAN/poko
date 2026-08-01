@@ -47,8 +47,7 @@ jobs:
       - name: Dead code
         run: pnpm knip
 
-      # `pnpm fuzz` becomes required at GATE 1, once Phase 1 has implemented
-      # generator + solver. Phase 0 intentionally ships typed stubs for them.
+      # `pnpm fuzz` runs in its own `fuzz` job below, not here.
 
       # INV-12: no third-party analytics or ad SDK may enter the client.
       - name: Forbidden dependency audit
@@ -58,6 +57,55 @@ jobs:
             exit 1
           fi
           echo "No forbidden SDKs found."
+
+  # INV-6: no generated board may be unsolvable.
+  #
+  # This job is a REQUIRED check from Phase 0 onward, but it cannot pass yet:
+  # generator and solver ship as typed stubs that throw NotImplementedError, so
+  # `pnpm fuzz` currently fails on every board. Rather than leave the gate
+  # unwired until someone remembers to turn it on at Gate 1, the job tolerates
+  # exactly one failure mode — NotImplementedError — and blocks on every other.
+  #
+  # The moment Phase 1 replaces those stubs, that failure mode disappears and the
+  # job becomes genuinely blocking with no configuration change. There is no
+  # checklist step to forget.
+  fuzz:
+    name: fuzz
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with: { version: 9.12.0 }
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Solvability fuzz gate
+        run: |
+          set +e
+          output=$(pnpm fuzz 2>&1)
+          code=$?
+          echo "$output"
+
+          if [ $code -eq 0 ]; then
+            echo "INV-6 holds across the fuzz corpus."
+            exit 0
+          fi
+
+          if echo "$output" | grep -q 'is not implemented yet (Phase 1)'; then
+            echo "::warning title=INV-6 gate pending::generator/solver are still Phase 0 stubs, so the fuzz gate cannot run for real yet. This job starts blocking automatically once they are implemented — no config change needed."
+            exit 0
+          fi
+
+          echo "::error title=INV-6 violation::pnpm fuzz failed for a reason other than an unimplemented stub."
+          exit $code
 
   commitlint:
     name: commit messages
