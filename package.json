@@ -1,0 +1,43 @@
+{
+  "name": "poko",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "turbo run test",
+    "depcruise": "depcruise packages apps tools --config .dependency-cruiser.js",
+    "fuzz": "node --import tsx tools/fuzz/index.ts",
+    "knip": "knip",
+    "verify": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm depcruise && pnpm test && pnpm knip",
+    "verify:gate1": "pnpm verify && pnpm fuzz",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
+    "@eslint/js": "^9.13.0",
+    "@types/node": "^20.17.0",
+    "@vitest/coverage-v8": "^2.1.4",
+    "dependency-cruiser": "^16.4.2",
+    "eslint": "^9.13.0",
+    "eslint-config-prettier": "^9.1.0",
+    "fast-check": "^3.22.0",
+    "husky": "^9.1.6",
+    "knip": "^5.34.0",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3",
+    "tsx": "^4.19.1",
+    "turbo": "^2.2.3",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.11.0",
+    "vitest": "^2.1.4"
+  }
+}

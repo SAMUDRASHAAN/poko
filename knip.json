@@ -1,0 +1,11 @@
+{
+  "$schema": "https://unjs.io/schema/knip.json",
+  "workspaces": {
+    "packages/engine": { "project": ["src/**/*.ts"] },
+    "packages/ui": { "project": ["src/**/*.ts"] },
+    "tools/fuzz": { "project": ["**/*.ts"] }
+  },
+  "ignoreIssues": {
+    "packages/engine/src/types.ts": ["types"]
+  }
+}
