@@ -19,6 +19,11 @@ import type {
   PuzzleSeed,
 } from './types.js';
 import type { Num } from './num.js';
+import { createInitialState, generatePackInternal } from './generator.js';
+import { dispatchGame } from './machine.js';
+import { updateMasteryModel } from './mastery.js';
+import { restoreState, serialiseState } from './serialisation.js';
+import { analyseBoard } from './solver.js';
 
 export class NotImplementedError extends Error {
   constructor(fn: string) {
@@ -28,37 +33,37 @@ export class NotImplementedError extends Error {
 }
 
 /** Build a fresh, validated level. Deterministic in `seed`. */
-export function createLevel(_seed: number, _rules: LevelRules, _band: BandConfig): LevelState {
-  throw new NotImplementedError('createLevel');
+export function createLevel(seed: number, rules: LevelRules, band: BandConfig): LevelState {
+  return createInitialState(seed, rules, band);
 }
 
 /** Pure reducer. Same state + same action = same next state, always. [INV-5] */
-export function dispatch(_state: LevelState, _action: GameAction): LevelState {
-  throw new NotImplementedError('dispatch');
+export function dispatch(state: LevelState, action: GameAction): LevelState {
+  return dispatchGame(state, action);
 }
 
 /** Lossless with `restore`. [INV-7] */
-export function serialise(_state: LevelState): string {
-  throw new NotImplementedError('serialise');
+export function serialise(state: LevelState): string {
+  return serialiseState(state);
 }
 
-export function restore(_blob: string): LevelState {
-  throw new NotImplementedError('restore');
+export function restore(blob: string): LevelState {
+  return restoreState(blob);
 }
 
 /** Every solution for a target. Budget: under 5ms on an 8x8 board. */
-export function analyse(_board: Board, _target: Num, _rules: LevelRules): Analysis {
-  throw new NotImplementedError('analyse');
+export function analyse(board: Board, target: Num, rules: LevelRules): Analysis {
+  return analyseBoard(board, target, rules);
 }
 
 /** Solution-first level generation. Never produces an impossible target. [INV-6] */
-export function generatePack(_bandId: string, _count: number, _seed: number): PuzzleSeed[] {
-  throw new NotImplementedError('generatePack');
+export function generatePack(bandId: string, count: number, seed: number): PuzzleSeed[] {
+  return generatePackInternal(bandId, count, seed);
 }
 
 /** Exponential moving average update. Pure. */
-export function updateMastery(_prev: Mastery, _attempt: Attempt): Mastery {
-  throw new NotImplementedError('updateMastery');
+export function updateMastery(previous: Mastery, attempt: Attempt): Mastery {
+  return updateMasteryModel(previous, attempt);
 }
 
 export type {
