@@ -65,6 +65,42 @@ function makeDisplay(tiles: readonly Tile[], operation: Operation, result: Tile[
   return `${display} = ${fmt(result)}`;
 }
 
+/**
+ * Arithmetic-only evaluation, for hot paths that need the number and nothing else.
+ *
+ * `evaluateChain` builds a display string for every call. Decoy scanning evaluates
+ * every adjacent pair on the board, many times per generated level, and throws all
+ * those strings away — which cost the fuzz gate more than tenfold. Returns null
+ * when the chain is not legal.
+ */
+export function chainResult(
+  board: Board,
+  cells: readonly Cell[],
+  band: BandConfig,
+): Tile['value'] | null {
+  if (validateChain(board, cells, band) !== null) return null;
+
+  const tiles = cells
+    .map((cell) => getTile(board, cell))
+    .filter((tile): tile is Tile => tile !== null);
+  if (tiles.length === 0) return null;
+
+  const operation = tiles[0]?.operation ?? 'add';
+  let result = tiles[0]?.value ?? ZERO;
+
+  for (let index = 1; index < tiles.length; index += 1) {
+    const nextOperation = operatorFor(tiles, index, operation);
+    try {
+      result = applyOperation(result, (tiles[index] as Tile).value, nextOperation);
+    } catch {
+      return null;
+    }
+    if (nextOperation === 'div' && !isInt(result)) return null;
+  }
+
+  return result;
+}
+
 export function evaluateChain(board: Board, cells: readonly Cell[], band: BandConfig): Equation {
   const tiles = cells
     .map((cell) => getTile(board, cell))

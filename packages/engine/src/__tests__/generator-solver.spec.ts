@@ -29,7 +29,27 @@ describe('solution-first generation and solver [INV-3, INV-6]', () => {
       {
         "firstRow": [
           [
-            4,
+            8,
+            "add",
+            "coral",
+          ],
+          [
+            7,
+            "add",
+            "coral",
+          ],
+          [
+            3,
+            "add",
+            "coral",
+          ],
+          [
+            6,
+            "add",
+            "coral",
+          ],
+          [
+            5,
             "sub",
             "marine",
           ],
@@ -39,17 +59,7 @@ describe('solution-first generation and solver [INV-3, INV-6]', () => {
             "marine",
           ],
           [
-            8,
-            "add",
-            "coral",
-          ],
-          [
             9,
-            "sub",
-            "marine",
-          ],
-          [
-            6,
             "sub",
             "marine",
           ],
@@ -58,20 +68,10 @@ describe('solution-first generation and solver [INV-3, INV-6]', () => {
             "add",
             "coral",
           ],
-          [
-            1,
-            "add",
-            "coral",
-          ],
-          [
-            4,
-            "sub",
-            "marine",
-          ],
         ],
         "target": {
           "d": 1,
-          "n": 4,
+          "n": 12,
         },
       }
     `);
@@ -153,9 +153,10 @@ describe('solution-first generation and solver [INV-3, INV-6]', () => {
     expect(analyseBoard(empty, int(-1), { ...RULES, objective: 'exactlyThree' }).isStuck).toBe(
       true,
     );
+    // A 1x1 board has no chainable pairs at all, so it also fails the decoy floor.
     expect(validatePuzzle(empty, int(1), RULES, BAND)).toMatchObject({
       valid: false,
-      reasons: ['unsolvable', 'tooFewSolutions'],
+      reasons: ['unsolvable', 'tooFewSolutions', 'weakDecoys'],
     });
   });
 });
