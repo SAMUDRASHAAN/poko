@@ -1,7 +1,12 @@
 import { difficultyScore } from './difficulty.js';
-import { int } from './num.js';
+import { int, type Num } from './num.js';
 import { createRng, type Rng } from './rng.js';
-import { validatePuzzle } from './validator.js';
+import {
+  DECOY_NEAR_DISTANCE,
+  DECOY_NEAR_RATIO,
+  decoyQuality,
+  validatePuzzle,
+} from './validator.js';
 import type {
   BandConfig,
   BandId,
@@ -146,12 +151,209 @@ export function chooseGuaranteedSolution(rng: Rng, band: BandConfig): Guaranteed
   throw new RangeError(`band ${band.id} cannot produce a legal target`);
 }
 
+/**
+ * Build a guaranteed solution that lands on a SPECIFIC target, rather than
+ * wherever the rng happens to fall. Refill uses this to keep the new target near
+ * the values the surviving tiles already carry. Returns null when the band cannot
+ * express that target.
+ */
+export function solutionForTarget(
+  rng: Rng,
+  band: BandConfig,
+  targetValue: number,
+): GuaranteedSolution | null {
+  if (targetValue > band.maxTarget) return null;
+  if (targetValue < 0 && !band.allowNegatives) return null;
+
+  const [minimum, maximum] = band.numberRange;
+  const slotCount = Math.max(
+    1,
+    Math.min(band.allowedOperations.length, band.allowedColours.length),
+  );
+
+  for (const slot of rng.shuffle(Array.from({ length: slotCount }, (_, index) => index))) {
+    const operation = band.allowedOperations[slot] ?? 'add';
+    const colour = band.allowedColours[slot] ?? 'coral';
+    const effective = operation === 'wild' ? 'add' : operation;
+    const pairs: (readonly [number, number])[] = [];
+
+    for (let left = minimum; left <= maximum; left += 1) {
+      let right: number | null = null;
+      switch (effective) {
+        case 'add':
+          right = targetValue - left;
+          break;
+        case 'sub':
+          right = left - targetValue;
+          break;
+        case 'mul':
+          right = left !== 0 && targetValue % left === 0 ? targetValue / left : null;
+          break;
+        case 'div':
+          right = targetValue !== 0 && left % targetValue === 0 ? left / targetValue : null;
+          break;
+      }
+      if (right === null || right < minimum || right > maximum) continue;
+      if (effective === 'div' && right === 0) continue;
+      pairs.push([left, right]);
+    }
+
+    const chosen = pairs[rng.int(0, Math.max(0, pairs.length - 1))];
+    if (pairs.length > 0 && chosen) {
+      return { operation, colour, left: chosen[0], right: chosen[1], target: int(targetValue) };
+    }
+  }
+
+  return null;
+}
+
 export function randomTile(rng: Rng, band: BandConfig, id: string): Tile {
   const { operation, colour } = operationSlot(rng, band);
   const value = rng.int(band.numberRange[0], band.numberRange[1]);
   return operation === 'wild'
     ? { id, value: int(value), colour, operation, ownOperator: 'add' }
     : { id, value: int(value), colour, operation };
+}
+
+/** Share of cells that are steered toward the target rather than filled uniformly. */
+const NEAR_MISS_PERCENT = 85;
+
+/**
+ * Longest run of one colour the fill will deliberately create.
+ *
+ * A decoy needs a same-colour PAIR, not a blob. Left uncapped, steering grows
+ * large single-colour regions, and because any path through such a region is a
+ * legal chain, the count of chains hitting the target exactly explodes — one
+ * board reached 1639 solutions against a ceiling of 6.
+ */
+const MAX_STEERED_RUN = 3;
+
+/** Re-fills to try before settling for the best board seen. */
+const DECOY_TUNE_ATTEMPTS = 12;
+
+/** Is `anchor OP value` a near miss for the target — close, but not a solution? */
+function isNearMiss(band: BandConfig, target: Num, anchor: Tile, value: number): boolean {
+  if (target.d !== 1 || anchor.value.d !== 1) return false;
+  const operation = anchor.operation === 'wild' ? (anchor.ownOperator ?? 'add') : anchor.operation;
+
+  let result: number;
+  switch (operation === 'wild' ? 'add' : operation) {
+    case 'add':
+      result = anchor.value.n + value;
+      break;
+    case 'sub':
+      result = anchor.value.n - value;
+      break;
+    case 'mul':
+      result = anchor.value.n * value;
+      break;
+    case 'div':
+      if (value === 0 || anchor.value.n % value !== 0) return false;
+      result = anchor.value.n / value;
+      break;
+  }
+
+  if (!band.allowNegatives && result < 0) return false;
+  if (result > band.maxTarget) return false;
+
+  const distance = Math.abs(result - target.n);
+  return distance > 0 && distance <= DECOY_NEAR_DISTANCE;
+}
+
+/**
+ * A tile forming near-miss decoys with as many of `anchors` as one value can.
+ *
+ * It inherits the anchors' colour and operation, because `validateChain` rejects
+ * colour mismatches — a differently-coloured neighbour is not a decoy at all, it
+ * is simply unchainable. Only anchors sharing that colour can be satisfied, so
+ * the largest same-colour group wins; on a diagonal board a cell sits in up to
+ * four pairs, and steering only one of them leaves the rest uniform.
+ */
+export function nearMissTile(
+  rng: Rng,
+  band: BandConfig,
+  target: Num,
+  anchors: readonly Tile[],
+  id: string,
+): Tile | null {
+  if (anchors.length === 0) return null;
+
+  // Group anchors by colour without allocating a Map per cell: this runs for every
+  // cell of every fill attempt, and the fuzz gate generates 100k boards.
+  const groups: Tile[][] = [];
+  for (const anchor of anchors) {
+    const existing = groups.find((group) => group[0]?.colour === anchor.colour);
+    if (existing) existing.push(anchor);
+    else groups.push([anchor]);
+  }
+
+  let group: Tile[] = groups[0] ?? [];
+  for (const candidate of groups) {
+    if (candidate.length > group.length) group = candidate;
+  }
+  const lead = group[0];
+  if (!lead) return null;
+
+  const [minimum, maximum] = band.numberRange;
+
+  // Collect every value achieving the best hit count, then choose among them
+  // UNIFORMLY.
+  //
+  // Scanning the range from a random offset and taking the first hit looks
+  // equivalent and is not: it favours whichever value follows the largest gap of
+  // misses. That bias compounds cell over cell — each tile anchors the next — and
+  // collapses the board into a monoculture. One seed produced an entire board of
+  // 3s with target 9, giving 370 solutions against a ceiling of 6 and no decoys
+  // at all.
+  const candidates: number[] = [];
+  let bestHits = 0;
+
+  for (let value = minimum; value <= maximum; value += 1) {
+    let hits = 0;
+    for (const anchor of group) if (isNearMiss(band, target, anchor, value)) hits += 1;
+    if (hits === 0) continue;
+    if (hits > bestHits) {
+      bestHits = hits;
+      candidates.length = 0;
+    }
+    if (hits === bestHits) candidates.push(value);
+  }
+
+  const best =
+    candidates.length > 0 ? (candidates[rng.int(0, candidates.length - 1)] ?? null) : null;
+
+  if (best === null) return null;
+  return lead.operation === 'wild'
+    ? { id, value: int(best), colour: lead.colour, operation: lead.operation, ownOperator: 'add' }
+    : { id, value: int(best), colour: lead.colour, operation: lead.operation };
+}
+
+/** Length of the contiguous same-colour run ending at (row, col), walking back. */
+function runLength(
+  rows: readonly (readonly Tile[])[],
+  current: readonly Tile[],
+  row: number,
+  col: number,
+  colour: TileColour,
+  rowDelta: number,
+  colDelta: number,
+): number {
+  let length = 0;
+  let r = row - rowDelta;
+  let c = col - colDelta;
+  while (length < MAX_STEERED_RUN) {
+    const tile = r === row ? current[c] : rows[r]?.[c];
+    if (!tile || tile.colour !== colour) break;
+    length += 1;
+    r -= rowDelta;
+    c -= colDelta;
+  }
+  return length;
+}
+
+/** True when this cell should be steered toward the target. Consumes rng either way. */
+export function shouldNearMiss(rng: Rng): boolean {
+  return rng.int(0, 99) < NEAR_MISS_PERCENT;
 }
 
 export function solutionTiles(
@@ -187,6 +389,54 @@ function solutionCells(rng: Rng): readonly [Cell, Cell] {
   ];
 }
 
+/**
+ * Fill in reading order so each cell can be steered against a neighbour that is
+ * already placed — the left or the one above. Both sit before the current cell in
+ * reading order, which is the order `decoyQuality` measures pairs in.
+ */
+function fillDecoyBoard(rng: Rng, band: BandConfig, target: Num, seed: number): Tile[][] {
+  const tiles: Tile[][] = [];
+
+  for (let row = 0; row < 8; row += 1) {
+    const current: Tile[] = [];
+    for (let col = 0; col < 8; col += 1) {
+      const id = `${seed}-${row}-${col}`;
+      const previous = row > 0 ? tiles[row - 1] : undefined;
+      const anchors: Tile[] = [];
+      const left = col > 0 ? current[col - 1] : undefined;
+      const above = previous?.[col];
+      if (left) anchors.push(left);
+      if (above) anchors.push(above);
+      // Diagonal bands make diagonal pairs chainable too, so they must be
+      // steered as well or they drag the ratio down. Both diagonals in the row
+      // above precede this cell in reading order.
+      if (band.allowDiagonals) {
+        const aboveLeft = col > 0 ? previous?.[col - 1] : undefined;
+        const aboveRight = previous?.[col + 1];
+        if (aboveLeft) anchors.push(aboveLeft);
+        if (aboveRight) anchors.push(aboveRight);
+      }
+
+      const steered =
+        anchors.length > 0 && shouldNearMiss(rng)
+          ? nearMissTile(rng, band, target, anchors, id)
+          : null;
+
+      // Reject a steered tile that would extend a colour run past the cap; the
+      // decoy is not worth the chain explosion behind it.
+      const extendsRun =
+        steered !== null &&
+        (runLength(tiles, current, row, col, steered.colour, 0, 1) >= MAX_STEERED_RUN ||
+          runLength(tiles, current, row, col, steered.colour, 1, 0) >= MAX_STEERED_RUN);
+
+      current.push(extendsRun || steered === null ? randomTile(rng, band, id) : steered);
+    }
+    tiles.push(current);
+  }
+
+  return tiles;
+}
+
 function createBoard(
   seed: number,
   band: BandConfig,
@@ -197,21 +447,44 @@ function createBoard(
 } {
   const normalisedSeed = seed >>> 0;
   const rng = createRng(normalisedSeed);
-  const tiles: Tile[][] = Array.from({ length: 8 }, (_, row) =>
-    Array.from({ length: 8 }, (_, col) => randomTile(rng, band, `${normalisedSeed}-${row}-${col}`)),
-  );
-  const solution = chooseGuaranteedSolution(rng, band);
-  const cells = solutionCells(rng);
-  const guaranteedTiles = solutionTiles(solution, `${normalisedSeed}-solution`);
-  const firstRow = tiles[cells[0].row];
-  const secondRow = tiles[cells[1].row];
-  if (firstRow && secondRow) {
-    firstRow[cells[0].col] = guaranteedTiles[0];
-    secondRow[cells[1].col] = guaranteedTiles[1];
+
+  // Fill, measure, keep the best — ADR-0004's "validate and tune". `createLevel`
+  // has no retry loop of its own the way `generatePackInternal` does.
+  //
+  // The TARGET is re-rolled per attempt, not just the fill: some targets are
+  // intrinsically hostile to decoys. A target of 0 in a band that forbids
+  // negatives leaves only 1, 2, 3 as near misses, and a target hard against
+  // `maxTarget` is squeezed from the other side. No fill can rescue those, so the
+  // loop has to be able to walk away from the target itself.
+  let bestTiles: Tile[][] | null = null;
+  let bestTarget: Num | null = null;
+  let bestRatio = -1;
+
+  for (let attempt = 0; attempt < DECOY_TUNE_ATTEMPTS; attempt += 1) {
+    const solution = chooseGuaranteedSolution(rng, band);
+    const tiles = fillDecoyBoard(rng, band, solution.target, normalisedSeed);
+    const cells = solutionCells(rng);
+    const guaranteedTiles = solutionTiles(solution, `${normalisedSeed}-solution`);
+    const firstRow = tiles[cells[0].row];
+    const secondRow = tiles[cells[1].row];
+    if (firstRow && secondRow) {
+      firstRow[cells[0].col] = guaranteedTiles[0];
+      secondRow[cells[1].col] = guaranteedTiles[1];
+    }
+
+    const candidate: Board = { width: 8, height: 8, tiles, seed: normalisedSeed };
+    const ratio = decoyQuality(candidate, solution.target, band).ratio;
+    if (ratio > bestRatio) {
+      bestRatio = ratio;
+      bestTiles = tiles;
+      bestTarget = solution.target;
+    }
+    if (ratio >= DECOY_NEAR_RATIO) break;
   }
+
   return {
-    board: { width: 8, height: 8, tiles, seed: normalisedSeed },
-    target: solution.target,
+    board: { width: 8, height: 8, tiles: bestTiles ?? [], seed: normalisedSeed },
+    target: bestTarget ?? int(0),
     rngState: rng.state(),
   };
 }
