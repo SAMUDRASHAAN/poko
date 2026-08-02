@@ -92,7 +92,7 @@ export function analyseBoard(
     allowedOperations: operations.length > 0 ? operations : ['add'],
     allowedColours: colours.length > 0 ? colours : ['coral'],
     minChain: rules.objective === 'exactlyThree' ? 3 : 2,
-    maxChain: rules.objective === 'exactlyThree' ? 3 : 6,
+    maxChain: rules.objective === 'exactlyThree' ? 3 : 5,
     maxTarget: Number.MAX_SAFE_INTEGER,
     allowNegatives: target.n < 0,
     allowDiagonals: false,
