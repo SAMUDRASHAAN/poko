@@ -75,16 +75,3 @@ export function allCells(board: Board): Cell[] {
   }
   return cells;
 }
-
-export function neighbours(board: Board, cell: Cell, allowDiagonals: boolean): Cell[] {
-  const result: Cell[] = [];
-  for (let rowDelta = -1; rowDelta <= 1; rowDelta += 1) {
-    for (let colDelta = -1; colDelta <= 1; colDelta += 1) {
-      const candidate = { row: cell.row + rowDelta, col: cell.col + colDelta };
-      if (isInBounds(board, candidate) && areAdjacent(cell, candidate, allowDiagonals)) {
-        result.push(candidate);
-      }
-    }
-  }
-  return result;
-}
