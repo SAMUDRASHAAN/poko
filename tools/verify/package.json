@@ -8,6 +8,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@poko/engine": "workspace:*"
+    "@poko/engine": "workspace:*",
+    "@poko/levelgen": "workspace:*"
   }
 }

@@ -1,4 +1,4 @@
-import { generatePack, type PuzzleSeed } from '../verify/engine-contract.js';
+import { generatePack, type PuzzleSeed } from '@poko/engine';
 
 export const BAND_IDS = [
   'sprout',

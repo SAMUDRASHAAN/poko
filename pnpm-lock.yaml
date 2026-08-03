@@ -73,11 +73,20 @@ importers:
         specifier: workspace:*
         version: link:../../packages/engine
 
+  tools/levelgen:
+    dependencies:
+      '@poko/engine':
+        specifier: workspace:*
+        version: link:../../packages/engine
+
   tools/verify:
     dependencies:
       '@poko/engine':
         specifier: workspace:*
         version: link:../../packages/engine
+      '@poko/levelgen':
+        specifier: workspace:*
+        version: link:../levelgen
 
 packages:
 
