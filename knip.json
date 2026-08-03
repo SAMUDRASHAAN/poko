@@ -4,6 +4,7 @@
     "packages/engine": { "project": ["src/**/*.ts"] },
     "packages/ui": { "project": ["src/**/*.ts"] },
     "tools/fuzz": { "project": ["**/*.ts"] },
+    "tools/levelgen": { "project": ["**/*.ts"] },
     "tools/verify": { "project": ["**/*.ts"] }
   },
   "ignoreIssues": {

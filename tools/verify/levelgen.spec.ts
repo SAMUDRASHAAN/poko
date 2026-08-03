@@ -2,13 +2,13 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
-import { parseLevelgenArgs } from '../levelgen/index.js';
 import {
   buildPackArtifact,
+  parseLevelgenArgs,
   renderPackArtifact,
   validatePuzzles,
   type LevelPackArtifact,
-} from '../levelgen/pack.js';
+} from '@poko/levelgen';
 
 describe('levelgen pack artifact', () => {
   it('is deterministic, validated, unique and stably sorted', () => {

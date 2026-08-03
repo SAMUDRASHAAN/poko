@@ -11,6 +11,18 @@ import {
   type LevelgenBandId,
 } from './pack.js';
 
+// The package root is the whole public surface: consumers import '@poko/levelgen',
+// never a deep path into it. [AGENTS.md rule 9]
+export {
+  BAND_IDS,
+  buildPackArtifact,
+  isLevelgenBandId,
+  renderPackArtifact,
+  validatePuzzles,
+  type LevelgenBandId,
+  type LevelPackArtifact,
+} from './pack.js';
+
 const USAGE = `Usage: node --import tsx tools/levelgen/index.ts \\
   --band <${BAND_IDS.join('|')}> --count <positive integer> --seed <integer> [--output <file>]
 `;
