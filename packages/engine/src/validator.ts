@@ -119,10 +119,18 @@ export function rankTargetsForBoard(board: Board, band: BandConfig): number[] {
     return (prefix[high + 1] ?? 0) - (prefix[low] ?? 0);
   };
 
-  // A target must itself be legal for the band, even if the board's values roam
-  // beyond that.
-  const firstTarget = band.allowNegatives ? lowest : Math.max(0, lowest);
-  const lastTarget = Math.min(highest, band.maxTarget);
+  // Candidates reach DECOY_NEAR_DISTANCE beyond the observed values, because a
+  // target that far out still turns those values into near misses.
+  //
+  // Restricting candidates to the observed range is actively harmful on a
+  // low-diversity board: if every pair evaluates to 2, the only candidate is 2,
+  // which makes every pair an exact solution and leaves no decoys at all. A target
+  // of 5 makes the same pairs near misses instead.
+  const reach = DECOY_NEAR_DISTANCE;
+  const firstTarget = band.allowNegatives
+    ? lowest - reach
+    : Math.max(0, Math.min(lowest, lowest - reach));
+  const lastTarget = Math.min(highest + reach, band.maxTarget);
 
   const scored: { target: number; score: number }[] = [];
   for (let target = firstTarget; target <= lastTarget; target += 1) {

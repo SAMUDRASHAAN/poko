@@ -1,7 +1,6 @@
 import { allCells, applyGravity, getTile, removeCells, replaceTiles } from './board.js';
 import {
   chooseGuaranteedSolution,
-  createInitialState,
   nearMissTile,
   randomTile,
   solutionForTarget,
@@ -11,6 +10,7 @@ import {
 import { createRng, type Rng } from './rng.js';
 import { analyseWithBand } from './solver.js';
 import { rankTargetsForBoard } from './validator.js';
+import type { Num } from './num.js';
 import type { BandConfig, Board, Cell, LevelRules, Tile } from './types.js';
 
 type RefillResult = {
@@ -30,8 +30,8 @@ function emptyAdjacentPair(emptyCells: readonly Cell[]): readonly [Cell, Cell] |
   return null;
 }
 
-function repairPair(board: Board, state: number): readonly [Cell, Cell] {
-  const rng = createRng(state);
+/** The caller owns the seed: the rng is injected, never constructed here. [INV-3] */
+function repairPair(board: Board, rng: Rng): readonly [Cell, Cell] {
   const horizontal = rng.int(0, 1) === 0;
   if (horizontal) {
     const row = rng.int(0, board.height - 1);
@@ -71,6 +71,62 @@ function chooseRefillSolution(
   return chooseGuaranteedSolution(rng, band);
 }
 
+/** Reshuffles to try before falling back to seeding a solution outright. */
+const TIDE_SHUFFLE_ATTEMPTS = 8;
+
+/**
+ * Layer 3 of the safety chain — "full `tideShuffle`, solution guaranteed, dressed
+ * as a story beat" (ADR-0004).
+ *
+ * The story beat is the whole point, and it constrains the implementation: the
+ * tide *rearranges the tiles already on the board*. It does not generate a new
+ * one. Regenerating would replace the puzzle the child was reasoning about with a
+ * stranger, which is not something an animation can honestly narrate.
+ *
+ * So the tile multiset is preserved. Only if no arrangement yields a solution are
+ * two tiles overwritten with a guaranteed pair, so "solution guaranteed" holds
+ * unconditionally. The target is never changed — it is given, not chosen.
+ */
+export function tideShuffle(
+  board: Board,
+  target: Num,
+  rules: LevelRules,
+  band: BandConfig,
+  rng: Rng,
+): Board {
+  const cells = allCells(board);
+  const present = cells
+    .map((cell) => getTile(board, cell))
+    .filter((tile): tile is Tile => tile !== null);
+
+  let stirred = board;
+  for (let attempt = 0; attempt < TIDE_SHUFFLE_ATTEMPTS; attempt += 1) {
+    const shuffled = rng.shuffle(present);
+    let index = 0;
+    stirred = replaceTiles(
+      board,
+      cells.map((cell) => [
+        cell,
+        getTile(board, cell) === null ? null : (shuffled[index++] ?? null),
+      ]),
+    );
+    if (analyseWithBand(stirred, target, rules, band).solutions.length > 0) return stirred;
+  }
+
+  // No arrangement of these tiles reaches the target. Seed a pair so the guarantee
+  // holds; everything else the child can see is still their own board.
+  if (target.d !== 1) return stirred;
+  const solution = solutionForTarget(rng, band, target.n);
+  if (!solution) return stirred;
+
+  const pair = repairPair(stirred, rng);
+  const guaranteed = solutionTiles(solution, `tide-${rng.state()}`);
+  return replaceTiles(stirred, [
+    [pair[0], guaranteed[0]],
+    [pair[1], guaranteed[1]],
+  ]);
+}
+
 export function refillAfterRemoval(
   board: Board,
   removed: readonly Cell[],
@@ -102,17 +158,38 @@ export function refillAfterRemoval(
         : null;
     filled = replaceTiles(filled, [[cell, tile ?? randomTile(rng, band, id)]]);
   });
-  const pair = preferredPair ?? repairPair(filled, rng.state());
   const guaranteed = solutionTiles(solution, `refill-${rngState}-solution`);
-  const repaired = replaceTiles(filled, [
+
+  // The three layers of ADR-0004, in order, each validated before the next is
+  // tried. Collapsing them — as this function used to — means layer 1 is never
+  // exercised alone, so a regression in solution seeding is masked forever by the
+  // repair that always followed it.
+
+  // LAYER 1 — seed the guaranteed solution into the INCOMING tiles.
+  const seeded = preferredPair
+    ? replaceTiles(filled, [
+        [preferredPair[0], guaranteed[0]],
+        [preferredPair[1], guaranteed[1]],
+      ])
+    : filled;
+  if (analyseWithBand(seeded, solution.target, rules, band).solutions.length > 0) {
+    return { board: seeded, target: solution.target, rngState: rng.state() };
+  }
+
+  // LAYER 2 — repair, mutating at most 2 tiles already on the board.
+  const pair = repairPair(seeded, rng);
+  const repaired = replaceTiles(seeded, [
     [pair[0], guaranteed[0]],
     [pair[1], guaranteed[1]],
   ]);
-
   if (analyseWithBand(repaired, solution.target, rules, band).solutions.length > 0) {
     return { board: repaired, target: solution.target, rngState: rng.state() };
   }
 
-  const shuffled = createInitialState(rng.state(), rules, band);
-  return { board: shuffled.board, target: shuffled.target, rngState: shuffled.rngState };
+  // LAYER 3 — the tide. Stirs the child's own tiles rather than replacing them.
+  return {
+    board: tideShuffle(repaired, solution.target, rules, band, rng),
+    target: solution.target,
+    rngState: rng.state(),
+  };
 }
