@@ -1,0 +1,1208 @@
+{
+  "schemaVersion": 1,
+  "packSeed": 5005,
+  "band": "pathfinder",
+  "count": 50,
+  "puzzles": [
+    {
+      "id": "pathfinder-12fg8qm",
+      "seed": 2323666750,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 72,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 6,
+        "accidentals": 5
+      }
+    },
+    {
+      "id": "pathfinder-1ba3igu",
+      "seed": 2858870334,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 72,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 7,
+        "accidentals": 6
+      }
+    },
+    {
+      "id": "pathfinder-1kpj98i",
+      "seed": 3428994690,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 72,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 6,
+        "accidentals": 5
+      }
+    },
+    {
+      "id": "pathfinder-1n5lu5j",
+      "seed": 3576921319,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 72,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 8,
+        "accidentals": 7
+      }
+    },
+    {
+      "id": "pathfinder-1oo1d4o",
+      "seed": 3668345016,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 72,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 8,
+        "accidentals": 7
+      }
+    },
+    {
+      "id": "pathfinder-1plof2i",
+      "seed": 3724847946,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 72,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 6,
+        "accidentals": 5
+      }
+    },
+    {
+      "id": "pathfinder-1r43y1q",
+      "seed": 3816271646,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 72,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 6,
+        "accidentals": 5
+      }
+    },
+    {
+      "id": "pathfinder-3dpqpw",
+      "seed": 204434564,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 72,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 8,
+        "accidentals": 7
+      }
+    },
+    {
+      "id": "pathfinder-6eksod",
+      "seed": 387281965,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 72,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 6,
+        "accidentals": 5
+      }
+    },
+    {
+      "id": "pathfinder-lnsr7u",
+      "seed": 1309762506,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 72,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 8,
+        "accidentals": 7
+      }
+    },
+    {
+      "id": "pathfinder-pmav42",
+      "seed": 1549112834,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 72,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 6,
+        "accidentals": 5
+      }
+    },
+    {
+      "id": "pathfinder-ygy4ub",
+      "seed": 2084316419,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 72,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 6,
+        "accidentals": 5
+      }
+    },
+    {
+      "id": "pathfinder-s2dg12",
+      "seed": 1697039462,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 77,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 5,
+        "accidentals": 4
+      }
+    },
+    {
+      "id": "pathfinder-tksz0f",
+      "seed": 1788463167,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 77,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 5,
+        "accidentals": 4
+      }
+    },
+    {
+      "id": "pathfinder-xn5sw",
+      "seed": 56507936,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 77,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 5,
+        "accidentals": 4
+      }
+    },
+    {
+      "id": "pathfinder-18u0xju",
+      "seed": 2710943706,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 82,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "pathfinder-1acggj1",
+      "seed": 2802367405,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 82,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "pathfinder-1eaykf8",
+      "seed": 3041717732,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 82,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "pathfinder-1j73q99",
+      "seed": 3337570989,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 82,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "pathfinder-1xiomuz",
+      "seed": 4203548603,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 82,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "pathfinder-7c7umh",
+      "seed": 443784905,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 82,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "pathfinder-ct5hhl",
+      "seed": 774558921,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 82,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "pathfinder-dqsjff",
+      "seed": 831061851,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 82,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "pathfinder-f982ep",
+      "seed": 922485553,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 82,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "pathfinder-grnldr",
+      "seed": 1013909247,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 82,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "pathfinder-j7q6as",
+      "seed": 1161835876,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 82,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "pathfinder-k5d88m",
+      "seed": 1218338806,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 82,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "pathfinder-n68a70",
+      "seed": 1401186204,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 82,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "pathfinder-xjb2wp",
+      "seed": 2027813497,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 82,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "pathfinder-13xvrpr",
+      "seed": 2415090447,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 87,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 3,
+        "accidentals": 2
+      }
+    },
+    {
+      "id": "pathfinder-17wdvlz",
+      "seed": 2654440775,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 87,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 3,
+        "accidentals": 2
+      }
+    },
+    {
+      "id": "pathfinder-1v2m1xx",
+      "seed": 4055621973,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 87,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 3,
+        "accidentals": 2
+      }
+    },
+    {
+      "id": "pathfinder-8undld",
+      "seed": 535208593,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 87,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 3,
+        "accidentals": 2
+      }
+    },
+    {
+      "id": "pathfinder-14vitnm",
+      "seed": 2471593378,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 92,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "pathfinder-16dycms",
+      "seed": 2563017076,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 92,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "pathfinder-1f8lmd2",
+      "seed": 3098220662,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 92,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "pathfinder-1gr15c8",
+      "seed": 3189644360,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 92,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "pathfinder-1ln6b6b",
+      "seed": 3485497619,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 92,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "pathfinder-1tk6iyq",
+      "seed": 3964198274,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 92,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "pathfinder-2g2os4",
+      "seed": 147931636,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 92,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "pathfinder-3v1",
+      "seed": 5005,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 92,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "pathfinder-4w59p3",
+      "seed": 295858263,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 92,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "pathfinder-bapyic",
+      "seed": 683135220,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 92,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "pathfinder-hpanbl",
+      "seed": 1070412177,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 92,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "pathfinder-o3vc4u",
+      "seed": 1457689134,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 92,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "pathfinder-uig0y3",
+      "seed": 1844966091,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 92,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "pathfinder-w0vjxc",
+      "seed": 1936389792,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 92,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "pathfinder-zzdntj",
+      "seed": 2175740119,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 92,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "pathfinder-1csj1g3",
+      "seed": 2950294035,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 97,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 1,
+        "accidentals": 0
+      }
+    },
+    {
+      "id": "pathfinder-1w093vt",
+      "seed": 4112124905,
+      "band": "pathfinder",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "pathfinder.mixed"
+        ]
+      },
+      "difficultyScore": 97,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 1,
+        "accidentals": 0
+      }
+    }
+  ]
+}

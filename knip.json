@@ -1,6 +1,7 @@
 {
   "$schema": "https://unjs.io/schema/knip.json",
   "workspaces": {
+    "packages/content": { "project": ["src/**/*.ts"] },
     "packages/engine": { "project": ["src/**/*.ts"] },
     "packages/ui": { "project": ["src/**/*.ts"] },
     "tools/fuzz": { "project": ["**/*.ts"] },

@@ -5,3 +5,8 @@ coverage/
 .turbo/
 .expo/
 pnpm-lock.yaml
+
+# Generated level artifacts: levelgen emits stable, sorted JSON and content asserts
+# byte-identical reproduction from the pack seed. Reformatting them would make the
+# committed file differ from what the generator produces. [02-content-spec 4.5]
+packages/content/levels/
