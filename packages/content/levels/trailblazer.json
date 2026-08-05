@@ -1,0 +1,1208 @@
+{
+  "schemaVersion": 1,
+  "packSeed": 4004,
+  "band": "trailblazer",
+  "count": 50,
+  "puzzles": [
+    {
+      "id": "trailblazer-14visvs",
+      "seed": 2471592376,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 59,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 6,
+        "accidentals": 5
+      }
+    },
+    {
+      "id": "trailblazer-1acgfrq",
+      "seed": 2802366422,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 59,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 6,
+        "accidentals": 5
+      }
+    },
+    {
+      "id": "trailblazer-1ba3hp0",
+      "seed": 2858869332,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 59,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 6,
+        "accidentals": 5
+      }
+    },
+    {
+      "id": "trailblazer-1gr14kf",
+      "seed": 3189643359,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 59,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 6,
+        "accidentals": 5
+      }
+    },
+    {
+      "id": "trailblazer-1j73phg",
+      "seed": 3337569988,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 59,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 6,
+        "accidentals": 5
+      }
+    },
+    {
+      "id": "trailblazer-1ln6aer",
+      "seed": 3485496627,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 59,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 6,
+        "accidentals": 5
+      }
+    },
+    {
+      "id": "trailblazer-1r43xac",
+      "seed": 3816270660,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 59,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 6,
+        "accidentals": 5
+      }
+    },
+    {
+      "id": "trailblazer-1v2m164",
+      "seed": 4055620972,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 59,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 6,
+        "accidentals": 5
+      }
+    },
+    {
+      "id": "trailblazer-7c7tuo",
+      "seed": 443783904,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 59,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 6,
+        "accidentals": 5
+      }
+    },
+    {
+      "id": "trailblazer-ct5gqa",
+      "seed": 774557938,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 59,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 6,
+        "accidentals": 5
+      }
+    },
+    {
+      "id": "trailblazer-f981ms",
+      "seed": 922484548,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 59,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 6,
+        "accidentals": 5
+      }
+    },
+    {
+      "id": "trailblazer-hpamk0",
+      "seed": 1070411184,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 59,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 6,
+        "accidentals": 5
+      }
+    },
+    {
+      "id": "trailblazer-k5d7h6",
+      "seed": 1218337818,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 59,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 6,
+        "accidentals": 5
+      }
+    },
+    {
+      "id": "trailblazer-xjb24r",
+      "seed": 2027812491,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 59,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 6,
+        "accidentals": 5
+      }
+    },
+    {
+      "id": "trailblazer-18u0ws4",
+      "seed": 2710942708,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 64,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 5,
+        "accidentals": 4
+      }
+    },
+    {
+      "id": "trailblazer-1n5ltdx",
+      "seed": 3576920325,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 64,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 5,
+        "accidentals": 4
+      }
+    },
+    {
+      "id": "trailblazer-3dppyd",
+      "seed": 204433573,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 64,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 5,
+        "accidentals": 4
+      }
+    },
+    {
+      "id": "trailblazer-xn516",
+      "seed": 56506938,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 64,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 5,
+        "accidentals": 4
+      }
+    },
+    {
+      "id": "trailblazer-12fg7yv",
+      "seed": 2323665751,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 69,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "trailblazer-17wduu7",
+      "seed": 2654439775,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 69,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "trailblazer-1csj0of",
+      "seed": 2950293039,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 69,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "trailblazer-1eayjnj",
+      "seed": 3041716735,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 69,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "trailblazer-1kpj8gv",
+      "seed": 3428993695,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 69,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "trailblazer-1oo1ccv",
+      "seed": 3668344015,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 69,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "trailblazer-1tk6i6x",
+      "seed": 3964197273,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 69,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "trailblazer-1xiom36",
+      "seed": 4203547602,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 69,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "trailblazer-4w58xa",
+      "seed": 295857262,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 69,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "trailblazer-8unctt",
+      "seed": 535207601,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 69,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "trailblazer-bapxql",
+      "seed": 683134221,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 69,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "trailblazer-j7q5iz",
+      "seed": 1161834875,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 69,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "trailblazer-tksy8g",
+      "seed": 1788462160,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 69,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 4,
+        "accidentals": 3
+      }
+    },
+    {
+      "id": "trailblazer-1f8lll9",
+      "seed": 3098219661,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 74,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 3,
+        "accidentals": 2
+      }
+    },
+    {
+      "id": "trailblazer-ygy42j",
+      "seed": 2084315419,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 74,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 3,
+        "accidentals": 2
+      }
+    },
+    {
+      "id": "trailblazer-zzdn1p",
+      "seed": 2175739117,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 74,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 3,
+        "accidentals": 2
+      }
+    },
+    {
+      "id": "trailblazer-13xvqyc",
+      "seed": 2415089460,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 79,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "trailblazer-16dybv2",
+      "seed": 2563016078,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 79,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "trailblazer-1ploeat",
+      "seed": 3724846949,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 79,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "trailblazer-1w0933y",
+      "seed": 4112123902,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 79,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "trailblazer-2g2o0a",
+      "seed": 147930634,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 79,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "trailblazer-339",
+      "seed": 4005,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 79,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "trailblazer-6ekrx3",
+      "seed": 387280983,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 79,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "trailblazer-dqsinp",
+      "seed": 831060853,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 79,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "trailblazer-lnsqg9",
+      "seed": 1309761513,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 79,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "trailblazer-n689f7",
+      "seed": 1401185203,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 79,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "trailblazer-o3vbde",
+      "seed": 1457688146,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 79,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "trailblazer-pmauc9",
+      "seed": 1549111833,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 79,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "trailblazer-uig06c",
+      "seed": 1844965092,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 79,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "trailblazer-w0vj5m",
+      "seed": 1936388794,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 79,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 2,
+        "accidentals": 1
+      }
+    },
+    {
+      "id": "trailblazer-grnkma",
+      "seed": 1013908258,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 84,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 1,
+        "accidentals": 0
+      }
+    },
+    {
+      "id": "trailblazer-s2df9c",
+      "seed": 1697038464,
+      "band": "trailblazer",
+      "rules": {
+        "objective": "equationCount",
+        "goalValue": 10,
+        "moveLimit": 20,
+        "obstacles": [],
+        "allowedPowerUps": [
+          "hintLens",
+          "equationShuffle"
+        ],
+        "targetSkills": [
+          "trailblazer.mixed"
+        ]
+      },
+      "difficultyScore": 84,
+      "validation": {
+        "solvable": true,
+        "solutionCount": 1,
+        "accidentals": 0
+      }
+    }
+  ]
+}
