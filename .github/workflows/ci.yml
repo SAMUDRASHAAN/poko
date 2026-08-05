@@ -3,6 +3,10 @@ name: CI
 on:
   push: { branches: [main] }
   pull_request:
+  # The full solvability gate runs nightly as well as on main, so the sampled
+  # pull-request tier can never be the last word on INV-6.
+  schedule:
+    - cron: '0 3 * * *'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -73,6 +77,18 @@ jobs:
     name: fuzz
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # Tiered: a sample on every pull request, the full corpus on main and nightly.
+    #
+    # The full 100k run takes ~7 minutes, and it is a required check on every PR.
+    # Paying that on each push makes the gate something people work around rather
+    # than with, and Phase 2 adds a device-performance job on top of it. A 10k
+    # sample still catches systematic INV-6 breakage within about a minute; the
+    # rare-case coverage moves to main and to the nightly schedule, where a slow
+    # job costs nobody's review cycle.
+    #
+    # The job NAME must stay `fuzz` — branch protection matches on it.
+    env:
+      FUZZ_RUNS: ${{ github.event_name == 'pull_request' && '10000' || '100000' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -90,6 +106,12 @@ jobs:
       - name: Solvability fuzz gate
         run: |
           set +e
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "::notice title=Fuzz tier::Sampled tier — $FUZZ_RUNS boards. The full 100k corpus runs on main and nightly."
+          else
+            echo "Full tier — $FUZZ_RUNS boards."
+          fi
+
           output=$(pnpm fuzz 2>&1)
           code=$?
           echo "$output"
