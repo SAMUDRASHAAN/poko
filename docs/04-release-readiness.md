@@ -131,14 +131,19 @@ Until the spike resolves, hold Phase 2's Skia work at a reversible boundary.
 
 ## 5. Keeping CI honest as it grows
 
-- **Tier the fuzz gate.** It is 7m05s on CI and required on every PR, and it will
-  grow. Run a 5–10k sample on PRs and the full 100k on `main` and nightly. Same
-  signal, without paying it on every push.
-- **Remove the flaky timing assertion.** `tools/verify/behaviour.spec.ts` asserts a
-  single wall-clock sample per seed and has already produced a false failure at
-  8.5 ms against a real 0.48 ms. Assert a median or p95 instead. One flaky required
-  check trains everyone to re-run red builds, which is how a real failure gets
-  waved through.
+- **The fuzz gate is tiered.** ✅ Pull requests run a 10,000-board sample; `main`
+  and the nightly schedule run the full 100,000. The full corpus took 7m05s and was
+  required on every push, which makes a gate something people work around rather
+  than with. The sampled tier still catches systematic INV-6 breakage in about a
+  minute, and rare-case coverage moves to where a slow job costs nobody's review
+  cycle. `FUZZ_RUNS` selects the tier; the job name stays `fuzz` because branch
+  protection matches on it.
+- **The timing assertion measures the distribution.** ✅
+  `tools/verify/behaviour.spec.ts` asserted a single wall-clock sample per seed and
+  produced two false failures — 8.6 ms and 6.4 ms against a real ~0.5 ms — the
+  second on a documentation-only pull request that changed no code. It now asserts
+  median and p90 against the 5 ms budget, with the max held to 5× as a pathology
+  guard. A regression moves the distribution; a noisy runner moves one sample.
 - **Grow required checks per phase**: device perf at Phase 2, RLS suite at Phase 3,
   difficulty-curve check at Phase 4.
 - **Cross-model review is currently unenforceable.** Both agents authenticate as the
@@ -153,7 +158,6 @@ Until the spike resolves, hold Phase 2's Skia work at a reversible boundary.
 | --------------------------------------------------------- | -------- | ----------------------------------------- |
 | `createInitialState` does not enforce `band.maxSolutions` | ADR-0009 | Decide before Phase 4 sets difficulty     |
 | Tide-shuffle story beat cannot be signalled to the client | PR #6    | Needs frozen-contract change + sync point |
-| `tools/verify` timing assertion is single-sample          | §5       | Before required-check count grows         |
 
 Levels shipped through `generatePack` are validated, so the first item is not
 urgent — but an ad-hoc `createLevel` can produce a board far easier than its band
@@ -188,6 +192,5 @@ the one most likely to be forgotten under delivery pressure.
 1. Order the reference devices; open counsel and trademark work in parallel.
 2. Build the Gate 2 frame-timing harness and the hit-target/variant test helpers
    before further board code lands.
-3. Tier the fuzz gate and de-flake the timing assertion.
-4. Run the Rive spike the day the Android device arrives; keep Phase 2 reversible
+3. Run the Rive spike the day the Android device arrives; keep Phase 2 reversible
    until it resolves.

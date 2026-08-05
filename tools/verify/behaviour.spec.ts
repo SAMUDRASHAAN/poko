@@ -63,18 +63,61 @@ describe('level generation and analysis [INV-3, INV-6]', () => {
     }
   });
 
+  /**
+   * The 5ms budget is asserted against the DISTRIBUTION, not against every
+   * individual sample.
+   *
+   * Asserting each seed individually failed twice on CI — seed 66 at 8.6ms, seed
+   * 56 at 6.4ms — including on a documentation-only pull request that changed no
+   * code, while the same seeds measure ~0.5ms locally. A single wall-clock sample
+   * on a shared runner picks up GC pauses and CPU steal from other tenants. A
+   * required check that cries wolf teaches everyone to re-run red builds, which is
+   * how a real failure eventually gets waved through.
+   *
+   * Median and p90 carry the real signal: a genuine regression moves the whole
+   * distribution, not one sample. The max is kept as a pathology guard at 5x the
+   * budget — far above observed runner noise, but low enough to catch a board that
+   * is genuinely catastrophic to analyse.
+   *
+   * Per-device frame budgets are Gate 2's job on real hardware; CI can only
+   * honestly assert "no gross regression".
+   */
   it('keeps public 8x8 analysis inside the 5ms budget', () => {
+    const BUDGET_MS = 5;
+    const PATHOLOGY_CEILING_MS = BUDGET_MS * 5;
+
     // Warm up module/JIT paths before measuring the public call itself.
     const warm = createLevel(41, RULES, SPROUT);
     analyse(warm.board, warm.target, warm.rules);
 
+    const samples: { seed: number; elapsedMs: number }[] = [];
     for (let seed = 42; seed < 74; seed += 1) {
       const state = createLevel(seed, RULES, SPROUT);
       const started = performance.now();
       analyse(state.board, state.target, state.rules);
-      const elapsedMs = performance.now() - started;
-      expect(elapsedMs, `seed ${seed} took ${elapsedMs.toFixed(3)}ms`).toBeLessThan(5);
+      samples.push({ seed, elapsedMs: performance.now() - started });
     }
+
+    const sorted = [...samples].sort((a, b) => a.elapsedMs - b.elapsedMs);
+    const at = (quantile: number): { seed: number; elapsedMs: number } =>
+      sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * quantile))] as {
+        seed: number;
+        elapsedMs: number;
+      };
+
+    const median = at(0.5);
+    const p90 = at(0.9);
+    const slowest = sorted[sorted.length - 1] as { seed: number; elapsedMs: number };
+    const report =
+      `median ${median.elapsedMs.toFixed(3)}ms, ` +
+      `p90 ${p90.elapsedMs.toFixed(3)}ms, ` +
+      `slowest ${slowest.elapsedMs.toFixed(3)}ms (seed ${slowest.seed})`;
+
+    expect(median.elapsedMs, `median over budget — ${report}`).toBeLessThan(BUDGET_MS);
+    expect(p90.elapsedMs, `p90 over budget — ${report}`).toBeLessThan(BUDGET_MS);
+    expect(slowest.elapsedMs, `a single analysis was pathologically slow — ${report}`).toBeLessThan(
+      PATHOLOGY_CEILING_MS,
+    );
   });
 });
 
