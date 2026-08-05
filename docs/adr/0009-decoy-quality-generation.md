@@ -71,18 +71,54 @@ regenerated deliberately. Any level seeds already distributed are invalid.
 
 Measured after, over 300 boards per band:
 
-| Band        | Generation (mean / worst) | Refill (aggregate) |
-| ----------- | ------------------------- | ------------------ |
-| sprout      | 66.0% / 60.0%             | 64.9%              |
-| adventurer  | 69.3% / 60.0%             | 67.4%              |
-| challenger  | 73.4% / 60.0%             | 71.7%              |
-| trailblazer | 68.8% / 60.0%             | 68.0%              |
-| pathfinder  | 69.5% / 60.0%             | 68.6%              |
+| Band        | Generation (mean) | Refill (aggregate) |
+| ----------- | ----------------- | ------------------ |
+| sprout      | 66.0%             | 64.9%              |
+| adventurer  | 69.3%             | 67.4%              |
+| challenger  | 73.4%             | 71.7%              |
+| trailblazer | 68.8%             | 68.0%              |
+| pathfinder  | 69.5%             | 68.6%              |
 
-**Generation meets the rule on every board.** Refill is deliberately weaker: it
-controls only the incoming tiles and the choice of target, so it is asserted in
-aggregate with a per-refill floor that catches a collapse. Making it per-board
-would mean rewriting tiles the child did not clear.
+### The guarantee has two tiers
+
+They must not be conflated, and each is asserted at its own strength:
+
+| Path           | Guarantee       | Why                                                                          |
+| -------------- | --------------- | ---------------------------------------------------------------------------- |
+| `generatePack` | **absolute**    | `validatePuzzle` rejects `weakDecoys` and the generator retries the seed     |
+| `createLevel`  | **statistical** | the tune loop is best-of-`DECOY_TUNE_ATTEMPTS`; it returns the best it found |
+
+**Every child-facing level comes from `generatePack`**, so the product carries the
+absolute guarantee. Measured: 0 of 1,000 shipped puzzles below the bar.
+
+`createLevel` on an arbitrary seed does not. Measured over a deterministic
+20,000-seed sweep: mean 66.2%, 2 seeds below the bar (0.010%), floor 58.0%.
+
+**Consequence.** Any future child-facing use of arbitrary seeds — an endless mode,
+a daily challenge, a practice generator — must route through `generatePack` or
+apply `validatePuzzle` itself. Calling `createLevel` directly inherits only the
+statistical guarantee, and roughly one seed in five thousand will show a child a
+board below the teaching bar.
+
+Refill is weaker again, deliberately: it controls only the incoming tiles and the
+choice of target, so it is asserted in aggregate with a per-refill floor that
+catches a collapse. Making it per-board would mean rewriting tiles the child did
+not clear.
+
+### Note on the original wording, kept deliberately
+
+This ADR first claimed "Generation meets the rule on every board", and the test
+suite asserted that as a `fast-check` property over arbitrary seeds on
+`createLevel`. Both were overstated: an absolute claim on a best-effort path.
+Fast-check correctly falsified it in CI at 0.594 after 109 runs.
+
+The fix was to match each assertion to its guarantee, **not** to make `createLevel`
+validate-and-retry — that would change rng consumption order, silently regenerate
+every existing level and break every golden seed.
+
+This note stays so a later session does not "simplify" the statistical sweep back
+into an absolute property. It would pass locally, and fail in CI eventually, which
+is the worst of both.
 
 **The fuzz gate got slower** — 100k boards went from ~16s to ~150s. Decoy scanning
 evaluates every adjacent pair many times per generated level. `chainResult` was
