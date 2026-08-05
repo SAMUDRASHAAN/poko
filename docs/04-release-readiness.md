@@ -154,14 +154,20 @@ Until the spike resolves, hold Phase 2's Skia work at a reversible boundary.
 
 ## 6. Known debt to schedule
 
-| Item                                                      | Source   | When                                      |
-| --------------------------------------------------------- | -------- | ----------------------------------------- |
-| `createInitialState` does not enforce `band.maxSolutions` | ADR-0009 | Decide before Phase 4 sets difficulty     |
-| Tide-shuffle story beat cannot be signalled to the client | PR #6    | Needs frozen-contract change + sync point |
+| Item                                                                                    | Source   | When                                      |
+| --------------------------------------------------------------------------------------- | -------- | ----------------------------------------- |
+| `createInitialState` does not enforce `band.maxSolutions`                               | ADR-0009 | Decide before Phase 4 sets difficulty     |
+| Tide-shuffle story beat cannot be signalled to the client                               | PR #6    | Needs frozen-contract change + sync point |
+| Daily-challenge and practice seeds must route through `generatePack`, not `createLevel` | ADR-0009 | Before any such mode ships                |
 
 Levels shipped through `generatePack` are validated, so the first item is not
 urgent — but an ad-hoc `createLevel` can produce a board far easier than its band
 intends, and the difficulty curve is measured on generated levels.
+
+The third is the same root cause seen from the product side. `createLevel` carries
+only a statistical decoy guarantee — roughly one seed in five thousand lands below
+the teaching bar — so any mode that generates levels from arbitrary seeds at
+runtime inherits that, while anything drawn from `generatePack` does not.
 
 ---
 
