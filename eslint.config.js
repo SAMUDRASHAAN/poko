@@ -10,7 +10,23 @@ import prettier from 'eslint-config-prettier';
  * it belongs here, not in prose.
  */
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/build/**', '**/.expo/**', '**/coverage/**', '**/*.d.ts'] },
+  {
+    ignores: [
+      '**/dist/**',
+      '**/build/**',
+      '**/.expo/**',
+      '**/coverage/**',
+      '**/*.d.ts',
+      // Throwaway spikes are not production code and are deliberately exempt.
+      // The engine invariants encoded below — no `Date.now()` [INV-5], no hex
+      // literals [INV-13], no `console` — are correct for `packages/**` and
+      // meaningless for a spike whose entire job is to log timestamped frame
+      // events. `spikes/**` is already outside the pnpm workspace and outside
+      // depcruise's scan scope; this closes the last hole in that isolation.
+      // Spikes are deleted or archived once their verdict is recorded.
+      'spikes/**',
+    ],
+  },
 
   js.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
