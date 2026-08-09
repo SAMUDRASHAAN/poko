@@ -21,6 +21,9 @@
     },
     "tools/verify": {
       "project": ["**/*.ts"]
+    },
+    "tools/gate2": {
+      "project": ["**/*.ts"]
     }
   },
   "ignoreIssues": {

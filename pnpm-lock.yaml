@@ -85,6 +85,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/engine
 
+  tools/gate2: {}
+
   tools/levelgen:
     dependencies:
       '@poko/engine':
