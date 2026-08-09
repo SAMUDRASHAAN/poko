@@ -135,6 +135,44 @@ through `generatePack` are validated and unaffected. Enforcing the ceiling insid
 `createInitialState` needs an `analyse()` per attempt, whose cost against the fuzz
 gate should be weighed on its own.
 
+### Resolved — enforced at the call site, not in the generator
+
+That weighing was done. Measured over 2,000 seeds per band, the share of
+`createInitialState` boards at or under the ceiling:
+
+| Band        | Ceiling | Within it | Median solutions |
+| ----------- | ------: | --------: | ---------------: |
+| sprout      |       4 |      3.3% |               14 |
+| adventurer  |       5 |     34.3% |                6 |
+| challenger  |       5 |     52.8% |                5 |
+| trailblazer |       6 |     20.2% |               18 |
+| pathfinder  |       8 |     44.0% |               10 |
+
+**The generator cannot enforce it at acceptable cost.** Its tune loop is best-of-12,
+so at sprout's 3.3% it would find a compliant board only 32.7% of the time; ~137
+attempts are needed for 99%, each carrying an `analyse()`. Worse, re-rolling changes
+rng consumption order, which regenerates every existing level — breaking the golden
+snapshot, `packages/content`'s byte-identical reproduction test, and all 250
+committed pack seeds. That is a breaking change, and it buys nothing the call site
+cannot buy more cheaply.
+
+**It did not need to be.** `maxSolutions` is a difficulty ceiling, not a
+correctness one — solvability is structurally guaranteed by the planted solution
+pair, which is what INV-6 and the fuzz gate protect. A board over the ceiling is
+too easy, not broken.
+
+The one live path that skipped validation was the `equationShuffle` power-up
+(`machine.ts`), which rebuilt the board straight from `createInitialState`. It now
+validates and redraws, exactly as `generatePackInternal` does, bounded at 512 draws
+and failing open. Measured cost: 2–31 draws on average by band, worst observed 203
+draws / 29 ms, and 0 of 2,000 trials reached the cap. `machine.spec.ts` sweeps all
+five bands so the loop cannot be removed silently.
+
+**Why this was invisible:** nothing measured the ceiling. The fuzz gate checks
+solvability and stuck-ness only, and it draws its boards from `generatePack`, which
+validates — so no green build was ever going to catch it. Same shape as the decoy
+defect this ADR exists for.
+
 ## Alternatives considered
 
 - **Validation without generation.** Rejecting weak boards in `validatePuzzle`
