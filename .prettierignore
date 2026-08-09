@@ -10,3 +10,7 @@ pnpm-lock.yaml
 # byte-identical reproduction from the pack seed. Reformatting them would make the
 # committed file differ from what the generator produces. [02-content-spec 4.5]
 packages/content/levels/
+
+# Throwaway spikes: not production code, and android/ holds generated build
+# artifacts. Already outside the pnpm workspace, depcruise and eslint scopes.
+spikes/

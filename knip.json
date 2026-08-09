@@ -1,15 +1,30 @@
 {
   "$schema": "https://unjs.io/schema/knip.json",
   "workspaces": {
-    "packages/client-data": { "project": ["src/**/*.ts"] },
-    "packages/content": { "project": ["src/**/*.ts"] },
-    "packages/engine": { "project": ["src/**/*.ts"] },
-    "packages/ui": { "project": ["src/**/*.ts"] },
-    "tools/fuzz": { "project": ["**/*.ts"] },
-    "tools/levelgen": { "project": ["**/*.ts"] },
-    "tools/verify": { "project": ["**/*.ts"] }
+    "packages/client-data": {
+      "project": ["src/**/*.ts"]
+    },
+    "packages/content": {
+      "project": ["src/**/*.ts"]
+    },
+    "packages/engine": {
+      "project": ["src/**/*.ts"]
+    },
+    "packages/ui": {
+      "project": ["src/**/*.ts"]
+    },
+    "tools/fuzz": {
+      "project": ["**/*.ts"]
+    },
+    "tools/levelgen": {
+      "project": ["**/*.ts"]
+    },
+    "tools/verify": {
+      "project": ["**/*.ts"]
+    }
   },
   "ignoreIssues": {
     "packages/engine/src/types.ts": ["types"]
-  }
+  },
+  "ignore": ["spikes/**"]
 }
