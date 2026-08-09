@@ -45,12 +45,21 @@ exist before the code they guard.
 ## Not yet done — your next actions
 
 - [x] `git init` on `main` + local Phase 0 baseline commit
-- [ ] Configure the remote, push, and enable branch protection on `main`
+- [x] Configure the remote, push, and enable branch protection on `main`
+      — `SAMUDRASHAAN/poko`; `main` requires PRs with `verify` + `commit messages` + `fuzz`, strict, linear history, admin enforcement on (verified: a direct
+      push is rejected with GH006)
 - [ ] Order the reference devices (one ~Rs.10k Android, one SE-class iPhone)
 - [ ] Run the 3-day `rive-react-native` spike (gates ADR-0001)
+      — **started, no verdict.** Emulator functional pass done (`spikes/rive-spike`,
+      see `RESULTS.md`): the runtime builds and links against Expo 57 / RN 0.86,
+      which retires the main toolchain risk. Performance is unmeasured and needs
+      physical hardware; a `.riv` rig is still outstanding.
 - [ ] Book Indian privacy counsel for the DPDP consent flow
 - [ ] Trademark search: "Poko's World" / "Sumlings" (Classes 9 and 41)
-- [ ] Create the two Phase 1 worktrees
+- [x] Create the two Phase 1 worktrees
+      — `wt/engine` and `wt/verify` were created from green `main`, carried Phase 1,
+      and were retired at the gate per `WORKTREE-PLAN.md` §12. The Phase 2 pair
+      (`wt/board`, `wt/ui`) now exists in their place.
 
 ## Exit gate
 
@@ -58,3 +67,15 @@ exist before the code they guard.
 - [x] `pnpm verify` green on a repo with no Phase 1 feature code (2026-08-02)
 
 Phase 1 may start after the owner-controlled Rive decision and remote/worktree setup above.
+
+> **What actually happened, recorded so the gap is visible rather than implied.**
+>
+> Phase 1 ran and completed **without** the Rive decision, and Gate 1 is green. That
+> was defensible: `packages/engine` imports nothing and is the least
+> framework-exposed work in the plan. It was not free — ADR-0001 states that if the
+> spike fails, the shared TypeScript engine is lost along with it.
+>
+> Phase 2 does **not** get the same latitude. `wt/board` is Skia and Reanimated, and
+> is discarded outright if ADR-0001 reverses. The reference devices remain the
+> single highest-value unblock: they gate the spike, the spike gates ADR-0001, and
+> ADR-0001 gates whether Phase 2 is React Native at all.
