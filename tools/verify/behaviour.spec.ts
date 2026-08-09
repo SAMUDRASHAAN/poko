@@ -74,17 +74,28 @@ describe('level generation and analysis [INV-3, INV-6]', () => {
    * required check that cries wolf teaches everyone to re-run red builds, which is
    * how a real failure eventually gets waved through.
    *
-   * Median and p90 carry the real signal: a genuine regression moves the whole
-   * distribution, not one sample. The max is kept as a pathology guard at 5x the
-   * budget — far above observed runner noise, but low enough to catch a board that
-   * is genuinely catastrophic to analyse.
+   * Then p90 was tried, and it failed too — on a docs-only pull request, twice
+   * over: `median 0.270ms, p90 8.437ms, slowest 16.334ms`. A p90 thirty times the
+   * median is not a slow analyser, it is a runner descheduling the process. On
+   * shared CI, more than 10% of wall-clock samples can be interference, so **any**
+   * tail statistic measures the runner rather than the code.
    *
-   * Per-device frame budgets are Gate 2's job on real hardware; CI can only
-   * honestly assert "no gross regression".
+   * So only the MEDIAN is asserted against the budget. It is robust to up to half
+   * the samples being disturbed, and at ~0.27ms it carries roughly 19x headroom —
+   * a genuine regression has to be enormous to hide from it, and nothing short of
+   * a real one can trip it.
+   *
+   * The max is kept only as a catastrophe guard, set far above observed noise
+   * (16ms seen) so it catches an algorithmic blow-up rather than a busy runner.
+   *
+   * Tail latency is what actually decides dropped frames, and it is deliberately
+   * NOT measured here: CI cannot measure it honestly. That is Gate 2's job on real
+   * hardware. Do not re-add a p90/p95 assertion to this file — it has now failed
+   * twice, and each time it taught everyone to re-run red builds.
    */
   it('keeps public 8x8 analysis inside the 5ms budget', () => {
     const BUDGET_MS = 5;
-    const PATHOLOGY_CEILING_MS = BUDGET_MS * 5;
+    const CATASTROPHE_CEILING_MS = 100;
 
     // Warm up module/JIT paths before measuring the public call itself.
     const warm = createLevel(41, RULES, SPROUT);
@@ -106,17 +117,14 @@ describe('level generation and analysis [INV-3, INV-6]', () => {
       };
 
     const median = at(0.5);
-    const p90 = at(0.9);
     const slowest = sorted[sorted.length - 1] as { seed: number; elapsedMs: number };
     const report =
       `median ${median.elapsedMs.toFixed(3)}ms, ` +
-      `p90 ${p90.elapsedMs.toFixed(3)}ms, ` +
       `slowest ${slowest.elapsedMs.toFixed(3)}ms (seed ${slowest.seed})`;
 
     expect(median.elapsedMs, `median over budget — ${report}`).toBeLessThan(BUDGET_MS);
-    expect(p90.elapsedMs, `p90 over budget — ${report}`).toBeLessThan(BUDGET_MS);
-    expect(slowest.elapsedMs, `a single analysis was pathologically slow — ${report}`).toBeLessThan(
-      PATHOLOGY_CEILING_MS,
+    expect(slowest.elapsedMs, `catastrophically slow analysis — ${report}`).toBeLessThan(
+      CATASTROPHE_CEILING_MS,
     );
   });
 });
