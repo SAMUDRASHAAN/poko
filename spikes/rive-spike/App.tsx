@@ -36,6 +36,37 @@ function log(event: string, data: Record<string, unknown> = {}): void {
   console.log(`SPIKE|${JSON.stringify({ t: Date.now(), event, ...data })}`);
 }
 
+/**
+ * Renders an unknown thrown/emitted value as something readable.
+ *
+ * `String(error)` on a plain object yields `[object Object]`, which is what the
+ * first emulator run produced for every `rive.error` — the one line that would
+ * have told us what the Rive runtime objected to, and it said nothing. Rive
+ * reports through React Native's synthetic event shape, so the useful payload is
+ * nested under `nativeEvent`.
+ */
+function describeError(error: unknown): string {
+  if (error instanceof Error) {
+    return `${error.name}: ${error.message}`;
+  }
+
+  if (typeof error === 'object' && error !== null) {
+    // Unwrap the RN synthetic event; fall back to the object itself.
+    const payload =
+      'nativeEvent' in error ? (error as { nativeEvent: unknown }).nativeEvent : error;
+    try {
+      const json = JSON.stringify(payload);
+      // JSON.stringify returns undefined for functions/symbols.
+      if (json !== undefined && json !== '{}') return json;
+    } catch {
+      // Circular structure — fall through to the tag below.
+    }
+    return Object.prototype.toString.call(payload);
+  }
+
+  return String(error);
+}
+
 /** One rig instance. `index` distinguishes instances in the stress case. */
 function Rig({ index, state }: { index: number; state: RigState }) {
   const riveRef = useRef<RiveRef>(null);
@@ -47,7 +78,7 @@ function Rig({ index, state }: { index: number; state: RigState }) {
       try {
         riveRef.current?.setInputState(STATE_MACHINE, candidate, candidate === state);
       } catch (error) {
-        log('setInputState.error', { index, candidate, message: String(error) });
+        log('setInputState.error', { index, candidate, message: describeError(error) });
       }
     }
     log('state.applied', { index, state });
@@ -61,7 +92,7 @@ function Rig({ index, state }: { index: number; state: RigState }) {
       try {
         riveRef.current?.setInputState(STATE_MACHINE, VISEME_INPUT, open);
       } catch (error) {
-        log('viseme.error', { index, message: String(error) });
+        log('viseme.error', { index, message: describeError(error) });
       }
     }, VISEME_INTERVAL_MS);
     return () => clearInterval(timer);
@@ -76,8 +107,8 @@ function Rig({ index, state }: { index: number; state: RigState }) {
       alignment={Alignment.Center}
       autoplay
       style={styles.rig}
-      onError={(error: unknown) => log('rive.error', { index, message: String(error) })}
-      onPlay={(animation: unknown) => log('rive.play', { index, animation: String(animation) })}
+      onError={(error: unknown) => log('rive.error', { index, message: describeError(error) })}
+      onPlay={(animation: unknown) => log('rive.play', { index, animation: describeError(animation) })}
     />
   );
 }

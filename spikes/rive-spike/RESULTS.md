@@ -51,7 +51,10 @@ prop, attempted the load, and reported the miss through its own error path:
 ```
 E RiveReactNativeView.handleFileNotFound(RiveReactNativeView.kt:959)
   RiveReactNativeView.reloadIfNeeded(RiveReactNativeView.kt:715)
-LOG SPIKE|{"event":"rive.error","index":0,...}
+
+SPIKE|{"event":"rive.error","index":0,"message":
+  "{\"type\":\"FileNotFound\",\"message\":\"File resource not found.
+    You must provide correct url or resourceName!\"}"}
 ```
 
 That is correct behaviour for a missing asset, and it is quietly good news: the
@@ -87,6 +90,7 @@ not. Toolchain risk is materially lower than before this session.
 | NDK 27.1.12297006                   | ✅ auto-installed                                   |
 | `app:assembleDebug`                 | ✅ **BUILD SUCCESSFUL in 21m 52s**                  |
 | Install + launch on emulator        | ✅ pid 9242                                         |
+| Incremental rebuild (after fix)     | ✅ **16s** — cold build cost does not recur         |
 
 Fixes needed along the way, both environmental rather than Rive-related:
 
@@ -156,9 +160,22 @@ thread) FPS will be read externally from `adb shell dumpsys gfxinfo`, which
 observes the real frame pipeline. Reporting a JS counter as "UI FPS" would put a
 fabricated number in the document meant to settle a stack decision.
 
-**Known defect in the harness:** `rive.error` currently logs `[object Object]`
-because the handler stringifies the error object directly. Serialise the payload
-before the physical-device session, or a real Rive error will be unreadable.
+**Harness defect — found and fixed.** `rive.error` originally logged
+`[object Object]`: the handler called `String(error)` on a plain object, so the one
+line that should have explained what Rive objected to said nothing. Rive reports
+through React Native's synthetic event shape, so the payload sits under
+`nativeEvent`. `describeError()` now unwraps that and serialises it, handling
+`Error` instances, circular structures and primitives.
+
+Verified by rebuild — same condition, same run, readable output:
+
+| | |
+| --- | --- |
+| before | `"[object Object]"` |
+| after | `{"type":"FileNotFound","message":"File resource not found. You must provide correct url or resourceName!"}` |
+
+The fixed message also independently confirms the diagnosis in check 2: Rive is
+reporting a missing asset, not a rendering or runtime defect.
 
 ---
 
