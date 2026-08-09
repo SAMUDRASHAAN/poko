@@ -59,6 +59,10 @@ Not "it works on my machine". Not "tests are mostly passing".
 ## Working agreement
 
 - Stay inside the "May edit" list in your task contract. Read widely, write narrowly.
+- Task contracts reference only in-repo paths that exist at prompt time. If a contract
+  names a file that is not there, say so and stop — never reconstruct what it was
+  supposed to contain. A spec you invent is indistinguishable from one you were given,
+  and reviewers cannot tell which they are reading.
 - Write the failing test first, then make it green.
 - Small commits, conventional format: `feat(engine): add chain extension guard`.
 - Never add a dependency without an ADR. `packages/engine` accepts none, ever.
