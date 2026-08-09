@@ -4,7 +4,7 @@
 | ----------- | ------------------------------------------------------------------- |
 | **Status**  | Functional pass run on emulator. **No performance verdict.**        |
 | **Purpose** | Settle the contingency in ADR-0001                                  |
-| **Updated** | 2026-08-06                                                          |
+| **Updated** | 2026-08-10                                                          |
 
 > **Nothing here is an estimate.** Every row is a reading from a run that actually
 > happened, or is marked not verified with the reason.
@@ -69,6 +69,71 @@ layer can render Rive **remains untested** — with no rig there is nothing to d
 so the two causes cannot be told apart. Neither "emulator renders Rive fine" nor
 "emulator cannot render Rive" is supported by this run.
 
+> **Resolved on 2026-08-10.** It renders, and it animates. See the run below.
+
+---
+
+## Run 2 (2026-08-10) — borrowed rig, emulator
+
+> ⚠️ **STILL FUNCTIONAL ONLY, AND STILL NOT POKO'S RIG.**
+> This run answers "does the runtime draw and animate here". It says nothing about
+> Poko's state machine, and nothing about performance.
+
+`poko.riv` still does not exist. To stop an unwritten art asset from also blocking
+the question ADR-0001 turns on, the harness was made rig-agnostic — every
+rig-specific name now sits in one `RigDescriptor` — and pointed at a borrowed file.
+
+**Rig under test:** `rives_animated_emojis.riv`, artboard `Emoji_package`, state
+machine `State Machine 1`, loaded **by URL** from `static.rive.app` so no borrowed
+binary enters the repo.
+**Licence:** Rive Community files are CC BY 4.0. Credit: *Rive (static.rive.app),
+CC BY 4.0 — https://creativecommons.org/licenses/by/4.0/*.
+
+### The emulator renders Rive, and animates it
+
+| Question                | Result             | Evidence                                                                        |
+| ----------------------- | ------------------ | ------------------------------------------------------------------------------- |
+| File loads over URL     | ✅ **yes**         | `rive.play` for `State Machine 1`; **no** `FileNotFound`                          |
+| Anything is drawn       | ✅ **yes**         | screenshot shows the rig on stage                                                 |
+| It animates             | ✅ **yes**         | **5 of 5** consecutive frames differ, 50,530–73,465 px changed per frame           |
+| Three instances draw    | ✅ **yes**         | `rive.play` for `index` 0, 1, 2; all three visible; pid 4253 unchanged             |
+
+Motion was measured on the **stage region only** (x 160–920, y 970–1535). Hashing
+the whole screen would have been worthless — the FPS counter in the overlay changes
+every second and would report "animating" on a completely frozen rig.
+
+That trap caught the first rig tried. `accessibility_reduced_motion.riv` loaded and
+drew, but its stage was **byte-identical across 5 frames over 3.5 s**. It is a
+reduced-motion demo, so a still frame is plausibly the point; either way it cannot
+tell "the runtime animates" from "the runtime drew once and stopped". Emulator
+animation scales were checked and are normal (`window` and `transition` = 1.0), so
+the stillness was not the OS suppressing motion. Poor instrument, not a Rive fault.
+
+### One non-fatal error, recorded rather than swallowed
+
+```
+SPIKE|{"event":"rive.error","index":0,
+  "message":"{\"type\":\"DataBindingError\",
+    \"message\":\"No default ViewModel found for artboard Emoji_package.\"}"}
+```
+
+This rig expects a data-binding ViewModel the harness does not supply. It did
+**not** prevent loading, drawing or animating — all four rows above hold with this
+error present. It is a property of the borrowed file, not of `rive-react-native`.
+
+### What this run does NOT establish
+
+| Check                              | Status                                                                 |
+| ---------------------------------- | ---------------------------------------------------------------------- |
+| 3 — four states switch from React  | ⛔ **still unverified** — borrowed rig's input names are undocumented; the descriptor declares none, so none were driven |
+| 5 — `mouthOpen` 80 ms toggle       | ⛔ **still unverified** — same reason; `viseme.skipped` logged so the gap is visible in the log rather than inferred |
+| Any performance figure             | ⛔ **not measured** — emulator, debug build, no reference device        |
+
+`js.fps` read **46.9 with three rigs** against ~20 with one. That is not a
+performance result and is not treated as one — a load figure that *improves* under
+more load is a good demonstration of why this counter was excluded from every
+conclusion in the first place.
+
 ---
 
 ## The strongest result: it builds
@@ -109,6 +174,18 @@ its absence for an oversight.
 ---
 
 ## Blockers
+
+> **Narrowed on 2026-08-10.** This section described one blocker; it is two, with
+> very different costs. A borrowed rig has since cleared the runtime half — the
+> emulator renders and animates Rive — so what remains below is scoped to Poko's
+> own state machine, plus the hardware the verdict actually needs.
+>
+> | Blocker | Blocks | Owner |
+> | --- | --- | --- |
+> | `assets/poko.riv` does not exist | checks 3 and 5 — **our** state machine | design |
+> | No reference device (~Rs.10k, 3–4 GB class) | the entire performance verdict, and so ADR-0001 | procurement |
+>
+> Neither is engineering work. The harness is ready for both.
 
 **No `.riv` rig exists.** This is the single reason checks 2–6 are not green.
 `App.tsx` expects `assets/poko.riv` exporting:
