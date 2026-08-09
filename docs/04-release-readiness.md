@@ -156,13 +156,25 @@ Until the spike resolves, hold Phase 2's Skia work at a reversible boundary.
 
 | Item                                                                                    | Source   | When                                      |
 | --------------------------------------------------------------------------------------- | -------- | ----------------------------------------- |
-| `createInitialState` does not enforce `band.maxSolutions`                               | ADR-0009 | Decide before Phase 4 sets difficulty     |
+| Band ceilings are far below what the generator naturally produces                       | ADR-0009 | Calibrate when Phase 4 sets difficulty    |
 | Tide-shuffle story beat cannot be signalled to the client                               | PR #6    | Needs frozen-contract change + sync point |
 | Daily-challenge and practice seeds must route through `generatePack`, not `createLevel` | ADR-0009 | Before any such mode ships                |
 
-Levels shipped through `generatePack` are validated, so the first item is not
-urgent — but an ad-hoc `createLevel` can produce a board far easier than its band
-intends, and the difficulty curve is measured on generated levels.
+The first item is a calibration question, not a defect. `generatePack` honours
+every ceiling — but it does so by scanning into a narrow tail: only 3.3% of
+generated sprout boards sit at or under the ceiling of 4, against a median of 14.
+So sprout content is drawn from an atypical 3% of the generator's output. Nothing
+breaks today, and whether that tail is the content we want is a decision worth
+making deliberately in Phase 4 rather than inheriting from a ceiling that was never
+calibrated against what the generator actually produces.
+
+The related enforcement gap is closed. `createInitialState` still does not enforce
+`band.maxSolutions` — it cannot at acceptable cost, and making it try would
+regenerate every existing level (ADR-0009, "Resolved"). Instead the one live path
+that skipped validation, the `equationShuffle` power-up, now validates and redraws
+the way `generatePack` does. The standing rule that replaces it: **any caller that
+builds a level from an arbitrary seed must validate it.** `createLevel` alone
+carries only a statistical guarantee.
 
 The third is the same root cause seen from the product side. `createLevel` carries
 only a statistical decoy guarantee — roughly one seed in five thousand lands below

@@ -5,6 +5,7 @@ import { eq } from './num.js';
 import { refillAfterRemoval } from './refill.js';
 import { analyseWithBand } from './solver.js';
 import type { GameAction, LevelState, Phase } from './types.js';
+import { validatePuzzle } from './validator.js';
 
 const INPUT_PHASES: readonly Phase[] = ['ready', 'dragging', 'previewing'];
 
@@ -171,6 +172,52 @@ function swap(state: LevelState, action: Extract<GameAction, { type: 'SWAP' }>):
   };
 }
 
+/**
+ * How many boards `equationShuffle` may draw before it settles for what it has.
+ *
+ * Same budget `generatePackInternal` uses, for the same reason: generous enough
+ * that exhausting it means something is wrong with the band, not with luck.
+ * Measured over 400 trials per band, the worst seed needed 203 draws (sprout) and
+ * nothing came close to the cap.
+ */
+const SHUFFLE_ATTEMPTS = 512;
+
+/**
+ * A replacement board that respects the band, not just the first one generated.
+ *
+ * `createInitialState` guarantees a board is SOLVABLE — it plants a solution pair —
+ * but it does not enforce `band.maxSolutions`. That ceiling is a difficulty
+ * control, and unenforced it runs far over: on sprout only 3.3% of generated
+ * boards sit at or under the ceiling of 4, against a median of 14. Handing one of
+ * those to a child mid-level makes the puzzle markedly easier than its band
+ * intends, which is the whole thing the band is for.
+ *
+ * Levels reached any other way are already validated — `generatePackInternal`
+ * retries until `validatePuzzle` passes — so this power-up was the one live path
+ * that skipped the check. Rather than enforce the ceiling inside
+ * `createInitialState` (which cannot be done at acceptable cost, and would change
+ * rng consumption order and so regenerate every existing level — see ADR-0009),
+ * the check lives here, at the call site, exactly as the pack generator does it.
+ *
+ * Deterministic in `state`, so `dispatch` stays a pure reducer [INV-5]: each
+ * rejected board hands its `rngState` to the next draw.
+ *
+ * Fails OPEN. If the budget runs out this returns the last candidate rather than
+ * throwing — a reducer must always return a state, and that board is still
+ * solvable by construction. A board that is too easy is a worse level; a thrown
+ * exception mid-level is a broken game.
+ */
+function shuffledLevel(state: LevelState): LevelState {
+  let candidate = createInitialState(state.rngState, state.rules, state.band);
+
+  for (let attempt = 1; attempt < SHUFFLE_ATTEMPTS; attempt += 1) {
+    if (validatePuzzle(candidate.board, candidate.target, state.rules, state.band).valid) break;
+    candidate = createInitialState(candidate.rngState, state.rules, state.band);
+  }
+
+  return candidate;
+}
+
 function usePowerUp(
   state: LevelState,
   action: Extract<GameAction, { type: 'USE_POWER_UP' }>,
@@ -180,7 +227,7 @@ function usePowerUp(
     return { ...state, hintsUsed: state.hintsUsed + 1, history: appendHistory(state, action) };
   }
   if (action.id === 'equationShuffle') {
-    const fresh = createInitialState(state.rngState, state.rules, state.band);
+    const fresh = shuffledLevel(state);
     return {
       ...state,
       board: fresh.board,

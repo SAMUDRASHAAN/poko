@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { createInitialState } from '../generator.js';
+import { createInitialState, defaultBand } from '../generator.js';
 import { dispatchGame } from '../machine.js';
 import { int } from '../num.js';
 import { analyseWithBand } from '../solver.js';
+import type { BandId } from '../types.js';
+import { validatePuzzle } from '../validator.js';
 import { BAND, RULES } from './fixtures.js';
 
 function playBestSolution(seed = 7) {
@@ -193,5 +195,73 @@ describe('pure game reducer [INV-5, INV-7]', () => {
         b: { row: 0, col: 0 },
       }),
     ).toBe(initial);
+  });
+});
+
+/**
+ * `equationShuffle` is the one live path that hands a child a board built straight
+ * from `createInitialState`. Everything else comes from `generatePack`, which
+ * validates and retries.
+ *
+ * That matters because `createInitialState` guarantees solvability but NOT
+ * `band.maxSolutions`: unenforced, only 3.3% of sprout boards sit at or under the
+ * ceiling of 4, against a median of 14. Nothing measured this, so the gap survived
+ * an entire phase of green builds — the reason it is measured here now.
+ *
+ * A deterministic sweep, not fast-check: the property is absolute (the power-up
+ * retries until it holds), but the failure mode worth catching is the retry loop
+ * being removed or capped too low, and a fixed sweep catches that reproducibly
+ * without the shrinking cost.
+ */
+describe('equationShuffle respects the band it shuffles within', () => {
+  const BAND_IDS: readonly BandId[] = [
+    'sprout',
+    'adventurer',
+    'challenger',
+    'trailblazer',
+    'pathfinder',
+  ];
+  const SEEDS = 50;
+
+  it.each(BAND_IDS)('keeps %s boards at or under the solution ceiling', (bandId) => {
+    const band = defaultBand(bandId);
+    if (!band) throw new Error(`missing band ${bandId}`);
+
+    const breaches: string[] = [];
+
+    for (let index = 0; index < SEEDS; index += 1) {
+      const seed = (index * 2654435761) >>> 0;
+      const state = dispatchGame(createInitialState(seed, RULES, band), {
+        type: 'USE_POWER_UP',
+        id: 'equationShuffle',
+      });
+
+      const solutions = analyseWithBand(state.board, state.target, RULES, band).solutions.length;
+      if (solutions > band.maxSolutions) {
+        breaches.push(`seed ${seed}: ${solutions} solutions > ceiling ${band.maxSolutions}`);
+      }
+    }
+
+    expect(breaches, breaches.slice(0, 5).join('\n')).toEqual([]);
+  });
+
+  /**
+   * The ceiling is one of several reasons `validatePuzzle` can reject a board. The
+   * power-up retries on ALL of them, so the shuffled board is fully valid — decoy
+   * quality included, which an unvalidated `createInitialState` board only carries
+   * statistically (ADR-0009).
+   */
+  it('returns a fully valid puzzle, not merely one under the ceiling', () => {
+    for (let index = 0; index < SEEDS; index += 1) {
+      const seed = (index * 40503) >>> 0;
+      const state = dispatchGame(createInitialState(seed, RULES, BAND), {
+        type: 'USE_POWER_UP',
+        id: 'equationShuffle',
+      });
+
+      expect(validatePuzzle(state.board, state.target, RULES, BAND).valid, `seed ${seed}`).toBe(
+        true,
+      );
+    }
   });
 });
