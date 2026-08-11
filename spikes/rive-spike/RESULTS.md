@@ -121,13 +121,83 @@ This rig expects a data-binding ViewModel the harness does not supply. It did
 **not** prevent loading, drawing or animating — all four rows above hold with this
 error present. It is a property of the borrowed file, not of `rive-react-native`.
 
+---
+
+## Run 3 (2026-08-10) — a rig with inputs, closing checks 3 and 5
+
+> ⚠️ **STILL FUNCTIONAL ONLY, AND STILL NOT POKO'S RIG.**
+
+**Rig:** Rive Community "animated login screen" (the teddy), artboard `Teddy`, by URL.
+**Licence:** CC BY 4.0 — *Rive Community, https://creativecommons.org/licenses/by/4.0/*.
+
+### Names were discovered, not assumed
+
+The state machine name was **not** configured. Naming it wrong fails the load, so the
+harness omitted it and read the name back from `rive.play`: **`Login Machine`**.
+
+Input names were then **probed** rather than trusted. `getBooleanState` and
+`getNumberState` resolve to null for an input that does not exist, which turns
+"the docs say `isChecking`" into "this file has `isChecking`":
+
+| Probed        | Result                | Reading on a fresh load |
+| ------------- | --------------------- | ----------------------- |
+| `isChecking`  | ✅ **boolean**         | `false`                 |
+| `isHandsUp`   | ✅ **boolean**         | `false`                 |
+| `numLook`     | ✅ **number**          | `0`                     |
+| `trigSuccess` | — not boolean/number  | `null`                  |
+| `trigFail`    | — not boolean/number  | `null`                  |
+
+**The last two rows are not evidence of absence.** Triggers are a third input kind,
+fired via `fireState` with no getter, so these probes cannot see them. Documentation
+describes both as triggers, which is consistent with what was measured; the probe
+simply cannot confirm or deny it.
+
+### Check 3 — four states switch from React state ✅ **verified**
+
+Not "no error was thrown". `setInputState` is fire-and-forget across the bridge and
+silently accepts an unknown input name, so the harness sets the input, waits, reads
+it back, and compares against what was expected:
+
+| Condition                                  | Matches | Mismatches |
+| ------------------------------------------ | ------: | ---------: |
+| Deliberate switches, 2.5 s apart            |   **7** |      **0** |
+| During the 20-switch burst (150 ms apart)   |       1 |         18 |
+
+Every mismatch is inside the burst, and the cause is the instrument: the readback
+settles for 250 ms while the burst switches every 150 ms, so it necessarily reads a
+state that has already moved on. Outside the burst the agreement is exact.
+
+**Confirmed visually too:** with `isHandsUp` set, the bear is drawn covering its
+eyes and the HUD reads `isHandsUp`. The input set is the pose rendered.
+
+### The readback needed a settle, and that is itself a finding
+
+The first version read the inputs back immediately and reported `matches:false`
+every time — while showing, in each case, *exactly the previous state*. The values
+were correct; the read was racing the write. A 250 ms settle turned 0/7 into 7/7.
+
+Worth recording because the failing version looked exactly like a broken state
+machine, and "the state machine does not apply inputs" is precisely the wrong
+conclusion to carry into an ADR.
+
+### Check 5 — rapid input toggle ✅ **runs clean**
+
+`numLook` driven 0 ↔ 100 every 80 ms for the whole session: **0** `viseme.error`,
+**0** `setInputState.error`. The input is confirmed real by the probe, so this is no
+longer a call into the void as it was when the rig was missing.
+
+### Check 8 — 20-switch burst ✅ **no crash**
+
+`burst.start` → `burst.end` in **3.3 s**, 26 `state.applied`, pid **5748 unchanged**.
+
 ### What this run does NOT establish
 
-| Check                              | Status                                                                 |
-| ---------------------------------- | ---------------------------------------------------------------------- |
-| 3 — four states switch from React  | ⛔ **still unverified** — borrowed rig's input names are undocumented; the descriptor declares none, so none were driven |
-| 5 — `mouthOpen` 80 ms toggle       | ⛔ **still unverified** — same reason; `viseme.skipped` logged so the gap is visible in the log rather than inferred |
-| Any performance figure             | ⛔ **not measured** — emulator, debug build, no reference device        |
+| Check                             | Status                                                                                                 |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| 3 — four states switch from React | ✅ **verified in Run 3** on a borrowed rig — two boolean states, not Poko's four                          |
+| 5 — 80 ms input toggle            | ✅ **runs clean in Run 3** on `numLook`, not Poko's `mouthOpen`                                           |
+| Poko's own state machine          | ⛔ **unverified and unverifiable** until `assets/poko.riv` exists — a borrowed rig cannot stand in for it |
+| Any performance figure            | ⛔ **not measured** — emulator, debug build, no reference device                                          |
 
 `js.fps` read **46.9 with three rigs** against ~20 with one. That is not a
 performance result and is not treated as one — a load figure that *improves* under

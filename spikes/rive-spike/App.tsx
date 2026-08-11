@@ -44,7 +44,18 @@ type RigDescriptor = {
   readonly source: { readonly resourceName: string } | { readonly url: string };
   /** Some files export several artboards; omitted means the file's default. */
   readonly artboard?: string;
-  readonly stateMachine: string;
+  /**
+   * Omitted means "let the file pick", and `rive.play` then REPORTS the name it
+   * chose. That is the discovery path for a borrowed file whose state machine name
+   * is not documented — guessing it wrong fails the load outright.
+   */
+  readonly stateMachine?: string;
+  /**
+   * Input names to probe at startup. `getBooleanState`/`getNumberState` resolve to
+   * null for an input that does not exist, so this reports which of a candidate
+   * list the file ACTUALLY exposes instead of trusting documentation.
+   */
+  readonly probeInputs?: readonly string[];
   /** Boolean inputs, one per state. Set true one at a time, others false. */
   readonly states: readonly string[];
   /** Input toggled rapidly as a lip-sync proxy; null if the rig has none. */
@@ -67,18 +78,37 @@ const POKO_RIG: RigDescriptor = {
 };
 
 /**
- * A borrowed rig, used only to answer whether the runtime renders at all.
+ * A rig with INPUTS, to reach checks 3 and 5.
  *
- * `states` and `viseme` are deliberately EMPTY. This file's artboard and state
- * machine names are documented; its input names are not, and guessing them would
- * produce `setInputState` calls against inputs that may not exist — failures
- * indistinguishable from a rig that cannot be driven. So this configuration
- * claims nothing about inputs, and the run establishes what the file exposes.
+ * Nothing measured with a borrowed rig describes Poko's rig, and no number taken
+ * from one belongs in a performance verdict.
  *
- * Nothing measured with this rig describes Poko's rig, and no number taken from
- * it belongs in a performance verdict.
+ * The emoji rig settled that the runtime draws and animates, but it exposed no
+ * documented inputs, so state switching and the rapid toggle stayed unverified.
+ * This one is widely documented as carrying `isChecking`, `isHandsUp` and
+ * `numLook` — but documentation is not evidence, so `probeInputs` checks each name
+ * against the loaded file and the run reports which ones are real.
+ *
+ * `stateMachine` is deliberately omitted: naming it wrong fails the load, and
+ * `rive.play` reports the name the file actually chose.
  */
 const BORROWED_RIG: RigDescriptor = {
+  label: 'rive-community-animated-login',
+  source: {
+    url: 'https://public.rive.app/community/runtime-files/2244-4463-animated-login-screen.riv',
+  },
+  // Discovered from `rive.play`, not guessed: the run reported "Login Machine".
+  stateMachine: 'Login Machine',
+  // Confirmed present by the probe: both booleans read back false on a fresh load.
+  states: ['isChecking', 'isHandsUp'],
+  // Confirmed present as a NUMBER, so the rapid toggle drives 0/100 rather than a bool.
+  viseme: { name: 'numLook', kind: 'number' },
+  probeInputs: ['isChecking', 'isHandsUp', 'numLook', 'trigSuccess', 'trigFail'],
+  attribution: 'Rive Community, CC BY 4.0 — https://creativecommons.org/licenses/by/4.0/',
+};
+
+/** Settled that the emulator renders and animates Rive; no usable inputs. */
+const EMOJI_RIG: RigDescriptor = {
   label: 'rive-animated-emojis',
   source: { url: 'https://static.rive.app/rivs/rives_animated_emojis.riv' },
   artboard: 'Emoji_package',
@@ -87,6 +117,7 @@ const BORROWED_RIG: RigDescriptor = {
   viseme: null,
   attribution: 'Rive (static.rive.app), CC BY 4.0 — https://creativecommons.org/licenses/by/4.0/',
 };
+void EMOJI_RIG;
 
 /**
  * First borrowed rig tried, kept for the record.
@@ -116,6 +147,9 @@ void POKO_RIG;
 type RigState = string;
 
 const VISEME_INTERVAL_MS = 80;
+
+/** Settling time before reading an input back; see `state.readback`. */
+const READBACK_SETTLE_MS = 250;
 
 /** Number-input rigs get an on/off pair rather than a boolean. */
 const VISEME_NUMBER_ON = 100;
@@ -163,15 +197,81 @@ function Rig({ index, state }: { index: number; state: RigState }) {
   // Drive the named state from React state, so a switch is a genuine
   // React render -> native bridge hop, which is what the product would do.
   useEffect(() => {
-    for (const candidate of RIG.states) {
-      try {
-        riveRef.current?.setInputState(RIG.stateMachine, candidate, candidate === state);
-      } catch (error) {
-        log('setInputState.error', { index, candidate, message: describeError(error) });
+    const machine = RIG.stateMachine;
+    if (machine) {
+      for (const candidate of RIG.states) {
+        try {
+          riveRef.current?.setInputState(machine, candidate, candidate === state);
+        } catch (error) {
+          log('setInputState.error', { index, candidate, message: describeError(error) });
+        }
       }
     }
     log('state.applied', { index, state });
+
+    /**
+     * Read the inputs back after setting them.
+     *
+     * "setInputState did not throw" is not evidence the state changed — the call
+     * is fire-and-forget across the bridge, and a wrong input name is silently
+     * accepted. Reading the value back is the difference between check 3 being
+     * verified and merely being attempted.
+     */
+    if (machine && RIG.states.length > 0 && index === 0) {
+      void (async () => {
+        // Wait before reading. `setInputState` is fire-and-forget across the
+        // bridge and the getters are async, so an immediate read returns the
+        // PREVIOUS value — measured, not assumed: without this delay every
+        // readback lagged the state by exactly one transition, which looks like a
+        // failure and is actually a race in the instrument.
+        await new Promise((resolve) => setTimeout(resolve, READBACK_SETTLE_MS));
+
+        const readback: Record<string, boolean | null> = {};
+        for (const candidate of RIG.states) {
+          readback[candidate] = (await riveRef.current?.getBooleanState(candidate)) ?? null;
+        }
+        const expected = Object.fromEntries(RIG.states.map((s) => [s, s === state]));
+        const matches = RIG.states.every((s) => readback[s] === expected[s]);
+        log('state.readback', { index, state, readback, expected, matches });
+      })();
+    }
   }, [state, index]);
+
+  /**
+   * Ask the loaded file which of the candidate inputs exist.
+   *
+   * Both getters resolve to null for an unknown input, so a non-null answer is
+   * positive evidence the input is really there — the difference between "the docs
+   * say isChecking" and "this file has isChecking". Runs once, after a short delay
+   * so the URL fetch and artboard bind have completed.
+   */
+  useEffect(() => {
+    const names = RIG.probeInputs;
+    if (!names || names.length === 0 || index !== 0) return;
+
+    const timer = setTimeout(() => {
+      void (async () => {
+        for (const name of names) {
+          try {
+            const asBoolean = await riveRef.current?.getBooleanState(name);
+            const asNumber = await riveRef.current?.getNumberState(name);
+            const kind =
+              asBoolean !== null && asBoolean !== undefined
+                ? 'boolean'
+                : asNumber !== null && asNumber !== undefined
+                  ? 'number'
+                  : 'absent';
+            log('probe.input', { name, kind, boolean: asBoolean ?? null, number: asNumber ?? null });
+          } catch (error) {
+            log('probe.error', { name, message: describeError(error) });
+          }
+        }
+        log('probe.done', { probed: names.length });
+      })();
+    }, 4000);
+
+    return () => clearTimeout(timer);
+  }, [index]);
 
   // Viseme proxy: toggle one input rapidly for the whole run.
   useEffect(() => {
@@ -190,7 +290,7 @@ function Rig({ index, state }: { index: number; state: RigState }) {
       try {
         const value =
           viseme.kind === 'boolean' ? open : open ? VISEME_NUMBER_ON : VISEME_NUMBER_OFF;
-        riveRef.current?.setInputState(RIG.stateMachine, viseme.name, value);
+        if (RIG.stateMachine) riveRef.current?.setInputState(RIG.stateMachine, viseme.name, value);
       } catch (error) {
         log('viseme.error', { index, message: describeError(error) });
       }
@@ -203,7 +303,7 @@ function Rig({ index, state }: { index: number; state: RigState }) {
       ref={riveRef}
       {...RIG.source}
       {...(RIG.artboard ? { artboardName: RIG.artboard } : {})}
-      stateMachineName={RIG.stateMachine}
+      {...(RIG.stateMachine ? { stateMachineName: RIG.stateMachine } : {})}
       fit={Fit.Contain}
       alignment={Alignment.Center}
       autoplay
