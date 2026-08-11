@@ -84,6 +84,15 @@ export const motion = {
   maxInputBlockMs: 300,
 } as const;
 
+/** Text scaling values exercised by the mandatory accessibility fixtures. */
+export const accessibility = {
+  textScale: {
+    base: 1,
+    large: 1.3,
+    extraLarge: 1.6,
+  },
+} as const;
+
 export const tokens = {
   colour,
   operationColour,
@@ -95,6 +104,7 @@ export const tokens = {
   font,
   touch,
   motion,
+  accessibility,
 } as const;
 
 export type Tokens = typeof tokens;
