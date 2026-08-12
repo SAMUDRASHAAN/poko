@@ -4,3 +4,4 @@ export * from './accessibility.js';
 export * from './variant-preferences.js';
 export * from './primitives.js';
 export * from './operation-appearance.js';
+export * from './native-accessibility.js';
