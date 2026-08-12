@@ -57,6 +57,40 @@ describe('Phase 2 primitive catalog', () => {
     expect(getPrimitiveDefinition('AudioButton').accessibleName).toBe('required-prop');
     expect(getPrimitiveDefinition('Icon').accessibleName).toBe('decorative-by-default');
   });
+
+  it('assigns renderer-neutral semantic roles to every primitive', () => {
+    const roleByName = Object.fromEntries(
+      PRIMITIVE_CATALOG.map((definition) => [definition.name, definition.semanticRole]),
+    );
+
+    expect(roleByName).toMatchObject({
+      Text: 'text',
+      Heading: 'heading',
+      Button: 'button',
+      IconButton: 'button',
+      AudioButton: 'button',
+      Toggle: 'switch',
+      Sheet: 'dialog',
+      Dialog: 'dialog',
+      Banner: 'status',
+      ProgressBar: 'progress',
+      Spinner: 'status',
+      Toast: 'alert',
+      Avatar: 'image',
+      Icon: 'image',
+      OperationMark: 'image',
+      SpokenLabel: 'text',
+      HitTarget: 'button',
+    });
+    expect(Object.keys(roleByName)).toHaveLength(PRIMITIVE_CATALOG.length);
+  });
+
+  it('announces transient feedback at the correct urgency', () => {
+    expect(getPrimitiveDefinition('Banner').liveRegion).toBe('polite');
+    expect(getPrimitiveDefinition('Spinner').liveRegion).toBe('polite');
+    expect(getPrimitiveDefinition('Toast').liveRegion).toBe('assertive');
+    expect(getPrimitiveDefinition('Button').liveRegion).toBe('off');
+  });
 });
 
 describe('variant render plans', () => {

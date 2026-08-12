@@ -3,3 +3,4 @@ export * from './hit-target.js';
 export * from './accessibility.js';
 export * from './variant-preferences.js';
 export * from './primitives.js';
+export * from './operation-appearance.js';

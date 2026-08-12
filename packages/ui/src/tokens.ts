@@ -50,9 +50,20 @@ export const operationGlyph = {
   wild: '\u2726',
 } as const;
 
+/** Pattern coding used when colour-vision support is enabled. */
+export const operationPattern = {
+  add: 'dots',
+  sub: 'waves',
+  mul: 'crosshatch',
+  div: 'diagonal',
+  wild: 'burst',
+} as const;
+
 export const space = [0, 4, 8, 12, 16, 24, 32, 48, 64] as const;
 
 export const radius = { tile: 8, card: 16, sheet: 24, pill: 999 } as const;
+
+export const outline = { standard: 2, strong: 4, focus: 4 } as const;
 
 export const type = {
   /** Always the largest type in the app. Never demote it. */
@@ -98,8 +109,10 @@ export const tokens = {
   operationColour,
   operationShape,
   operationGlyph,
+  operationPattern,
   space,
   radius,
+  outline,
   type,
   font,
   touch,
