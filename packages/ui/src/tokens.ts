@@ -65,6 +65,8 @@ export const radius = { tile: 8, card: 16, sheet: 24, pill: 999 } as const;
 
 export const outline = { standard: 2, strong: 4, focus: 4 } as const;
 
+export const opacity = { full: 1, disabled: 0.48 } as const;
+
 export const type = {
   /** Always the largest type in the app. Never demote it. */
   target: 56,
@@ -113,6 +115,7 @@ export const tokens = {
   space,
   radius,
   outline,
+  opacity,
   type,
   font,
   touch,

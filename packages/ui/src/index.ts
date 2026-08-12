@@ -5,3 +5,4 @@ export * from './variant-preferences.js';
 export * from './primitives.js';
 export * from './operation-appearance.js';
 export * from './native-accessibility.js';
+export * from './primitive-appearance.js';
