@@ -210,10 +210,9 @@ the one most likely to be forgotten under delivery pressure.
 
 ## 8. Next actions
 
-1. Select a dedicated Google Cloud project, configure billing and Test Lab APIs,
-   then verify both models pinned in `05-managed-device-profile.md`; open counsel
+1. Build the release instrumentation path that waits for Rive readiness, requests
+   60 Hz, and retains Macrobenchmark frame/memory evidence on both models pinned
+   in `05-managed-device-profile.md`.
+2. Complete the controlled Rive run before further board code lands; open counsel
    and trademark work in parallel.
-2. Build the Gate 2 frame-timing harness and the hit-target/variant test helpers
-   before further board code lands.
-3. Run the Rive spike when the managed profiles are available; keep Phase 2
-   reversible until it resolves.
+3. Keep Phase 2 reversible until ADR-0001 resolves.

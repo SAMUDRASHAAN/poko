@@ -48,12 +48,13 @@ exist before the code they guard.
 - [x] Configure the remote, push, and enable branch protection on `main`
       — `SAMUDRASHAAN/poko`; `main` requires PRs with `verify` + `commit messages` + `fuzz`, strict, linear history, admin enforcement on (verified: a direct
       push is rejected with GH006)
-- [ ] Configure authenticated managed-device-lab access and pin two qualifying
+- [x] Configure authenticated managed-device-lab access and pin two qualifying
       low-end Android model/API pairs per ADR-0010
-      — **partially complete.** Google Cloud CLI authentication works and
-      `docs/05-managed-device-profile.md` pins Galaxy A03s (`a03su`) and Infinix
-      SMART 8 (`Infinix-X6525`), both API 33 physical ARM64 devices marked
-      `DEVICE_CAPACITY_LOW`. Project selection, billing, and Test Lab APIs remain.
+      — project `poko-device-lab-20260814` has billing disabled and the Testing
+      and Tool Results APIs enabled. `docs/05-managed-device-profile.md` pins
+      Galaxy A03s (`a03su`, API 33) and Galaxy A04s (`a04s`, API 34), both
+      physical ARM64 devices marked `DEVICE_CAPACITY_LOW`. Both completed the
+      no-cost Nitro functional smoke; controlled performance runs remain.
 - [ ] Run the 3-day `rive-react-native` spike (gates ADR-0001)
       — **provisional physical pass, no verdict.** Legacy and Nitro runtimes build,
       render, and survive the stress harness on the available 7.2 GiB Snapdragon

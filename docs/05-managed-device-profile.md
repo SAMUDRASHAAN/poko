@@ -9,29 +9,30 @@ Firebase Test Lab, queried with Google Cloud CLI 580.0.0 on 2026-08-14.
 
 ## Pinned qualification models
 
-| Provider model ID | Device              | API | Catalog evidence                                             | Hardware evidence                                  |
-| ----------------- | ------------------- | --: | ------------------------------------------------------------ | -------------------------------------------------- |
-| `a03su`           | Samsung Galaxy A03s |  33 | physical phone; `arm64-v8a`; `DEVICE_CAPACITY_LOW`; 720×1600 | 3 GB RAM; MediaTek Helio P35; 60 Hz                |
-| `Infinix-X6525`   | Infinix SMART 8     |  33 | physical phone; `arm64-v8a`; `DEVICE_CAPACITY_LOW`; 720×1612 | 4 GB physical RAM; 12 nm value-class octa-core SoC |
+| Provider model ID | Device              | API | Catalog evidence                                             | Hardware evidence                                    |
+| ----------------- | ------------------- | --: | ------------------------------------------------------------ | ---------------------------------------------------- |
+| `a03su`           | Samsung Galaxy A03s |  33 | physical phone; `arm64-v8a`; `DEVICE_CAPACITY_LOW`; 720×1600 | 3 GB RAM; MediaTek Helio P35; 60 Hz                  |
+| `a04s`            | Samsung Galaxy A04s |  34 | physical phone; `arm64-v8a`; `DEVICE_CAPACITY_LOW`; 720×1600 | 3–4 GB RAM; Exynos 850; app-requested 60 Hz required |
 
 The catalog evidence above comes from `gcloud firebase test android models
 describe`. Hardware facts come from the manufacturers' published specifications:
 
 - Samsung Galaxy A03s spec sheet:
   <https://image-us.samsung.com/SamsungUS/samsungbusiness/pdf/spec-sheets/Galaxy_A03s_Unlocked_SpecSheet.pdf>
-- Infinix SMART 8 product page:
-  <https://www.infinixmobility.com/smart-8>
+- Samsung Galaxy A04s announcement and specifications:
+  <https://news.samsung.com/uk/samsung-welcomes-two-new-additions-to-the-a-series-the-a04s-and-the-a23-5g>
 
-The SMART 8 advertises 8 GB only by combining 4 GB physical RAM with 4 GB of
-storage-backed extended memory. ADR-0010 classifies devices by physical RAM, so it
-is a 4 GB qualification model.
+The Test Lab catalog does not expose physical RAM directly. The manufacturer
+specifications establish that each catalog model belongs to the approved 3–4 GB
+product family; the execution must still retain runtime `MemTotal` when the
+instrumentation environment permits it.
 
 ## Execution configuration
 
 Each model runs separately with:
 
 - physical device form only;
-- Android API 33, portrait, `en`, `US`;
+- the pinned Android API, portrait, `en`, `US`;
 - non-debuggable ARM64 release APK and instrumentation APK pinned by SHA-256;
 - one unmeasured warm-up followed by at least five measured iterations;
 - app-requested 60 Hz rendering for displays that expose a higher refresh mode;
@@ -44,13 +45,52 @@ Rive and Gate 2 are evaluated independently against ADR-0010. Both pinned models
 must pass; replacing a model requires recording the replacement, catalog output,
 hardware evidence, and reason in this file before the run.
 
+## Physical smoke evidence (2026-08-14)
+
+These are **functional cloud-path checks, not ADR-0001 or Gate 2 performance
+verdicts**. Firebase Robo exercised the controls opportunistically; it did not run
+five controlled iterations or collect Macrobenchmark frame distributions.
+
+Release APK SHA-256:
+`748a78db389bff50b99a9d76250fdca2d2058fe6298622986c00e91e210b95b3`.
+
+| Model                         | Matrix                 | Result                    | Observed behavior                                                                                                                                           |
+| ----------------------------- | ---------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Galaxy A03s (`a03su`, API 33) | `matrix-2mi4l9r1xx6wr` | ✅ 49 s physical Robo run | rendered Rive; enabled three rigs; completed the 20-switch burst; returned to one rig; completed a second burst; no fatal, soft-exception, or harness error |
+| Galaxy A04s (`a04s`, API 34)  | `matrix-3fp1lw2bjscu5` | ✅ 42 s physical Robo run | rendered one and three rigs; completed both burst paths; no fatal, soft-exception, or harness error                                                         |
+
+Retained cloud evidence:
+
+- A03s:
+  `gs://test-lab-xawiq9kh6t1y4-hfm9di99h0u7m/2026-08-14_01:46:13.820984_FbJu/`
+- A04s:
+  `gs://test-lab-xawiq9kh6t1y4-hfm9di99h0u7m/2026-08-14_02:05:46.813100_CYNH/`
+
+### Harness findings before qualification
+
+- On both low-end models, the three initial state readbacks performed after a
+  fixed 250 ms delay were still false. All settled readbacks after the burst were
+  true. The instrumentation harness must wait for observable Rive readiness with
+  a bounded timeout rather than treat 250 ms as a cross-device contract.
+- A04s screenshots visually confirm all three rigs, but its JS counter ran near
+  the 90 Hz panel rate. Qualification must request and verify 60 Hz before
+  comparing against the 16 ms budget.
+- The A03s three-rig screenshot was captured before both added rigs were visually
+  ready. Qualification must capture readiness before starting measurements.
+- `Infinix-X6525` failed three times in Test Lab infrastructure before app launch
+  (`Internal System Error 3`). `TECNO-BG6` showed the same pre-launch fault and
+  was cancelled. Neither result is an application failure, but neither device is
+  operationally suitable for the active profile today.
+
 ## Current readiness
 
-| Requirement                      | Status                                |
-| -------------------------------- | ------------------------------------- |
-| Google Cloud CLI installed       | ✅ 580.0.0                            |
-| Google account authenticated     | ✅                                    |
-| Qualification models available   | ✅ both currently report low capacity |
-| Dedicated project selected       | ⛔ pending owner choice               |
-| Billing/Test Lab APIs configured | ⛔ pending project selection          |
-| Release + instrumentation APKs   | ⛔ pending serialized mobile scaffold |
+| Requirement                    | Status                                |
+| ------------------------------ | ------------------------------------- |
+| Google Cloud CLI installed     | ✅ 580.0.0                            |
+| Google account authenticated   | ✅                                    |
+| Qualification models available | ✅ both currently report low capacity |
+| Dedicated project selected     | ✅ `poko-device-lab-20260814`         |
+| Billing                        | ✅ disabled; Spark path retained      |
+| Testing and Tool Results APIs  | ✅ enabled                            |
+| Physical smoke path            | ✅ both pinned models                 |
+| Release + instrumentation APKs | ⛔ pending serialized mobile scaffold |
