@@ -14,16 +14,7 @@ void main() {
     ]);
   });
 
-  test('implementation entry points remain visibly pending', () {
-    expect(
-      () => restore('{}'),
-      throwsA(
-        isA<UnimplementedError>().having(
-          (error) => error.message,
-          'message',
-          contains('Phase 1F engine'),
-        ),
-      ),
-    );
+  test('implemented entry points reject malformed state', () {
+    expect(() => restore('{}'), throwsA(isA<TypeError>()));
   });
 }
