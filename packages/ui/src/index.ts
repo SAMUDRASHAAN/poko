@@ -6,3 +6,4 @@ export * from './primitives.js';
 export * from './operation-appearance.js';
 export * from './native-accessibility.js';
 export * from './primitive-appearance.js';
+export * from './surface-appearance.js';
