@@ -26,6 +26,38 @@ const rules = LevelRules(
 );
 
 void main() {
+  test('matches full-state TypeScript oracle hashes and action trace', () {
+    const expectedStates = <int, (int, String)>{
+      12345: (5612, '36c20d70'),
+      -1: (5950, '65de4ac2'),
+      0: (5361, '7bbbe3a0'),
+      99: (5424, '6b0d633b'),
+    };
+    for (final entry in expectedStates.entries) {
+      expect(
+        _summary(serialise(createLevel(entry.key, rules, band))),
+        entry.value,
+      );
+    }
+
+    var state = createLevel(7, rules, band);
+    final solution = analyse(state.board, state.target, rules).bestSolution!;
+    final actions = <GameAction>[
+      BeginChain(solution.cells.first),
+      ...solution.cells.skip(1).map(ExtendChain.new),
+      const Commit(),
+    ];
+    const expectedTrace = <(int, String)>[
+      (5431, 'dea298fc'),
+      (5731, 'ede288fc'),
+      (5524, '951d65de'),
+    ];
+    for (var index = 0; index < actions.length; index += 1) {
+      state = dispatch(state, actions[index]);
+      expect(_summary(serialise(state)), expectedTrace[index]);
+    }
+  });
+
   test('public API creates, previews, and atomically resolves a level', () {
     final initial = createLevel(7, rules, band);
     final solution = analyseWithBand(
@@ -158,4 +190,12 @@ void main() {
       throwsRangeError,
     );
   });
+}
+
+(int, String) _summary(String value) {
+  var hash = 0x811c9dc5;
+  for (final codeUnit in value.codeUnits) {
+    hash = ((hash ^ codeUnit) * 0x01000193) & 0xffffffff;
+  }
+  return (value.length, hash.toRadixString(16).padLeft(8, '0'));
 }
