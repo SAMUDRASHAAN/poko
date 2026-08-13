@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "oracle": {
+    "implementation": "typescript",
+    "commit": "f0cf0ffab4cca7c88475b6d0c14bc2d82ce84040"
+  },
+  "cases": []
+}

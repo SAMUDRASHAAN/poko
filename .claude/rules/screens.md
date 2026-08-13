@@ -1,6 +1,6 @@
 ---
 paths:
-  - 'apps/mobile/src/app/**'
+  - 'flutter/apps/mobile/lib/features/**'
 ---
 
 # Screen rules
@@ -13,7 +13,7 @@ returns to Profile Select — never into a child session.
 
 ## Child zone
 
-- Minimum touch target 64x64 px. [INV-14]
+- Minimum touch target 64×64 logical pixels. [INV-14]
 - Every navigable element has an icon plus an audio label. Ages 4-7 must be able
   to use the app with zero reading.
 - No destructive action exists in the child zone at all.
@@ -27,5 +27,6 @@ returns to Profile Select — never into a child session.
 
 ## Never
 
-- No `<form>` elements. No browser storage. Use `packages/client-data`.
-- No hex literals or magic spacing values — everything from `@poko/ui`. [INV-13]
+- No browser storage. Persist through `poko_client_data`.
+- No colour literals or magic spacing values — everything from
+  `poko_design_system`. [INV-13]

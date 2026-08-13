@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://poko.world/contracts/v1/parity-fixture.schema.json",
+  "title": "Poko engine parity fixture manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "oracle", "cases"],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "oracle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["implementation", "commit"],
+      "properties": {
+        "implementation": {
+          "const": "typescript"
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "operation", "input", "expected"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "operation": {
+            "enum": [
+              "createLevel",
+              "dispatch",
+              "serialise",
+              "restore",
+              "analyse",
+              "generatePack",
+              "updateMastery"
+            ]
+          },
+          "input": {},
+          "expected": {}
+        }
+      }
+    }
+  }
+}

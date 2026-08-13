@@ -1,0 +1,17 @@
+name: poko_design_system
+description: Poko's World visual tokens and game-agnostic Flutter primitives.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.12.2
+  flutter: '>=1.17.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter

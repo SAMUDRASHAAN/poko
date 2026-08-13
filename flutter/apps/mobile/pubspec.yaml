@@ -1,0 +1,25 @@
+name: poko_mobile
+description: Poko's World offline Flutter client.
+publish_to: none
+version: 0.1.0+1
+resolution: workspace
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flame: 1.38.0
+  flutter:
+    sdk: flutter
+  poko_client_data: 0.1.0
+  poko_content: 0.1.0
+  poko_design_system: 0.1.0
+  poko_game_engine: 0.1.0
+  rive: 0.14.11
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

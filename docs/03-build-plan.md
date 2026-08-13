@@ -33,9 +33,9 @@ merged. Existing spike branches are evidence only.
 
 ## 3. Phase 1F — Flutter foundation and engine parity
 
-### 3.1 Serialized foundation
+### 3.1 Serialized foundation — complete
 
-One phase owner creates, before parallel feature work:
+The foundation sync point provides:
 
 - `flutter/` workspace with pinned Flutter/Dart SDK and locked dependencies;
 - `contracts/` with versioned language-neutral schemas and oracle fixtures;
@@ -46,7 +46,7 @@ One phase owner creates, before parallel feature work:
 - managed-device Macrobenchmark integration point in the Android host;
 - frozen Dart `Num`, engine public API and design-token contract.
 
-Every third-party package requires an ADR. Foundation chooses only the minimum
+Every third-party package requires an ADR. ADR-0012 chooses only the minimum
 needed to establish Flutter, Flame, Rive, test infrastructure, local persistence,
 and the app shell; screen/navigation conveniences wait until their phase.
 

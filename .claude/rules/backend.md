@@ -2,6 +2,7 @@
 paths:
   - 'apps/api/**'
   - 'packages/client-data/**'
+  - 'flutter/packages/client_data/**'
 ---
 
 # Backend and persistence rules
@@ -26,7 +27,8 @@ more, check ARCHITECTURE.md section 12 before continuing.
 
 ## Sync
 
-SQLite on device is the source of truth. [INV-9] The server is a sync target.
+SQLite through Flutter `client_data` is the on-device source of truth. [INV-9]
+The server is a sync target.
 Every outbox row carries a client UUID and `updated_at`; applying is idempotent.
 Progress conflicts resolve "best wins" (highest score / most stars), never by
 clobbering.

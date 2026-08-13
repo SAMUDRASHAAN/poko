@@ -20,13 +20,15 @@ Completed and retired:
 - original React Native `wt/board`: frozen after ADR-0011 and never merged as a
   production renderer;
 - original TypeScript `wt/ui`: reusable token/accessibility work is reference
-  material only until represented in the Dart token contract.
+  material now represented in the frozen Dart token contract;
+- `wt/flutter-foundation`: pinned workspace, package/contract boundaries, CI and
+  Android benchmark host (retire immediately after its green merge).
 
 No active feature worktree may start from the pre-ADR-0011 Phase 2 branches.
 
-## 3. Phase 1F foundation — single-threaded
+## 3. Phase 1F foundation — completed serialized sync point
 
-Create `wt/flutter-foundation` from fresh green main. It exclusively owns:
+`wt/flutter-foundation` was created from fresh green main and owns the completed:
 
 - `flutter/pubspec.yaml`, workspace/package manifests and lockfile;
 - Flutter/Dart SDK pin and bootstrap documentation;
@@ -38,8 +40,9 @@ Create `wt/flutter-foundation` from fresh green main. It exclusively owns:
 - frozen Dart engine API, `Num` and design-token surface;
 - Android host benchmark module skeleton.
 
-Exit only when both pnpm Gate 1 and the empty Flutter workspace are green. Merge
-and retire this worktree before creating the parallel pair.
+Its exit requires both pnpm Gate 1 and the empty Flutter workspace green plus
+buildable release/Macrobenchmark APKs. Merge and retire this worktree before
+creating the parallel pair.
 
 ## 4. Phase 1F engine + parity — two worktrees
 

@@ -73,8 +73,8 @@ exist before the code they guard.
 - [x] `pnpm install --frozen-lockfile` succeeds
 - [x] `pnpm verify` green on a repo with no Phase 1 feature code (2026-08-02)
 
-TypeScript Phase 1 is complete. Flutter Phase 1F starts only after the serialized
-foundation from the ADR-0011-rebased build and worktree plans.
+TypeScript Phase 1 and the serialized Flutter foundation are complete. The next
+Phase 1F sync point is the Dart engine port plus independent parity verification.
 
 > **What actually happened, recorded so the gap is visible rather than implied.**
 >
