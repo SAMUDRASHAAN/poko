@@ -48,25 +48,33 @@ exist before the code they guard.
 - [x] Configure the remote, push, and enable branch protection on `main`
       — `SAMUDRASHAAN/poko`; `main` requires PRs with `verify` + `commit messages` + `fuzz`, strict, linear history, admin enforcement on (verified: a direct
       push is rejected with GH006)
-- [ ] Order the reference devices (one ~Rs.10k Android, one SE-class iPhone)
-- [ ] Run the 3-day `rive-react-native` spike (gates ADR-0001)
-      — **started, no verdict.** Emulator functional pass done (`spikes/rive-spike`,
-      see `RESULTS.md`): the runtime builds and links against Expo 57 / RN 0.86,
-      which retires the main toolchain risk. Performance is unmeasured and needs
-      physical hardware; a `.riv` rig is still outstanding.
+- [x] Configure authenticated managed-device-lab access and pin two qualifying
+      low-end Android model/API pairs per ADR-0010
+      — project `poko-device-lab-20260814` has billing disabled and the Testing
+      and Tool Results APIs enabled. `docs/05-managed-device-profile.md` pins
+      Galaxy A03s (`a03su`, API 33) and Galaxy A04s (`a04s`, API 34), both
+      physical ARM64 devices marked `DEVICE_CAPACITY_LOW`. Both completed the
+      no-cost Nitro functional smoke and controlled qualification.
+- [x] Run the `rive-react-native` spike (gates ADR-0001)
+      — **failed the frame contingency on both managed models.** Five controlled
+      60 Hz iterations completed without crashes/restarts and below 113 MB PSS,
+      but CPU P95 was 19.93 ms on A03s and 18.66 ms on A04s; overrun P95 was
+      positive on both. ADR-0011 supersedes ADR-0001 and selects Flutter. Exact
+      evidence is in `06-rive-spike-results.md`.
 - [ ] Book Indian privacy counsel for the DPDP consent flow
 - [ ] Trademark search: "Poko's World" / "Sumlings" (Classes 9 and 41)
 - [x] Create the two Phase 1 worktrees
       — `wt/engine` and `wt/verify` were created from green `main`, carried Phase 1,
-      and were retired at the gate per `WORKTREE-PLAN.md` §12. The Phase 2 pair
-      (`wt/board`, `wt/ui`) now exists in their place.
+      and were retired at the gate. The original Phase 2 pair is frozen by
+      ADR-0011 and must not supply production React Native code.
 
 ## Exit gate
 
 - [x] `pnpm install --frozen-lockfile` succeeds
 - [x] `pnpm verify` green on a repo with no Phase 1 feature code (2026-08-02)
 
-Phase 1 may start after the owner-controlled Rive decision and remote/worktree setup above.
+TypeScript Phase 1 is complete. Flutter Phase 1F starts only after the serialized
+foundation from the ADR-0011-rebased build and worktree plans.
 
 > **What actually happened, recorded so the gap is visible rather than implied.**
 >
@@ -75,7 +83,7 @@ Phase 1 may start after the owner-controlled Rive decision and remote/worktree s
 > framework-exposed work in the plan. It was not free — ADR-0001 states that if the
 > spike fails, the shared TypeScript engine is lost along with it.
 >
-> Phase 2 does **not** get the same latitude. `wt/board` is Skia and Reanimated, and
-> is discarded outright if ADR-0001 reverses. The reference devices remain the
-> single highest-value unblock: they gate the spike, the spike gates ADR-0001, and
-> ADR-0001 gates whether Phase 2 is React Native at all.
+> Phase 2 did **not** get the same latitude. The controlled spike failed and
+> ADR-0011 exercised the pre-agreed Flutter fallback before a React Native mobile
+> scaffold or renderer was merged. The completed TypeScript engine is retained as
+> a parity oracle so gameplay behavior can be preserved mechanically in Dart.

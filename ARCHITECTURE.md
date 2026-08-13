@@ -1,379 +1,299 @@
 # ARCHITECTURE.md
 
-Canonical architecture for **Poko's World** — the child learning app whose v1 release is **Tally Sea**, a numeracy puzzle game.
+Canonical architecture for **Poko's World** — the child learning app whose v1
+release is **Tally Sea**, a numeracy puzzle game.
 
-> **For agents:** read this before writing code in a package you haven't touched this session. §6 (_Where does this code go?_) and §7 (_Invariants_) answer most questions without reading further. Every invariant has a mechanical enforcement — if you think you need to break one, stop and write an ADR instead.
+> Read this before writing code in a package you have not touched this session.
+> §6 and §7 define placement and invariants. Breaking either requires an ADR.
 
-|             |                                                                                                |
-| ----------- | ---------------------------------------------------------------------------------------------- |
-| **Status**  | Living document. Changes require an ADR (see §17)                                              |
-| **Scope**   | The complete system. v1 is built; v2/v3 extension points are marked **PLANNED — do not build** |
-| **Related** | `AGENTS.md` (rules) · `docs/00-product-spec.md` (game design) · `docs/adr/` (decisions)        |
-
----
+|             |                                                                                       |
+| ----------- | ------------------------------------------------------------------------------------- |
+| **Status**  | Living document; Flutter rebaseline accepted by ADR-0011                              |
+| **Scope**   | Complete v1 system; v2/v3 extension points are planned only                           |
+| **Related** | `AGENTS.md` · `docs/03-build-plan.md` · `docs/WORKTREE-PLAN.md` · ADR-0010 · ADR-0011 |
 
 ## 1. What this system is
 
-A cross-platform learning app for children aged 4–12, offline-first, parent-gated, with no ads and no behavioural profiling of children.
+Poko's World is a cross-platform, offline-first learning app for children aged
+4–12. It contains no ads or behavioural profiling. V1 is Tally Sea: an 8×8
+solution-first number puzzle with deterministic generation and a scripted host.
 
-- **v1 (building now)** — _Tally Sea_: an 8×8 number-puzzle game. Solution-first puzzle generation, on-device, deterministic. Poko is a scripted host. Spoken output, no voice input, no AI at runtime.
-- **v2 (planned)** — episodic story content and the _session ribbon_ that binds story to puzzle. Constrained voice input.
-- **v3 (planned)** — live conversational AI tutor beats.
+The production client is Flutter. Flame owns the board render/update loop and the
+official Rive Flutter runtime owns rigged characters. Game rules live in a pure
+Dart package with no Flutter or I/O dependency.
 
-**The architecture's central bet:** all game rules live in one pure-TypeScript package with no dependencies and no UI imports, so correctness can be proved in CI without a device, and so the same logic runs unchanged in the app, the web build, the level-generation CLI, and the test harness.
-
----
+The completed pure-TypeScript engine remains an executable oracle during the
+replatform. It is not embedded in, bridged into, or shipped with the Flutter app.
+Language-neutral fixtures prove the Dart implementation preserves its behaviour.
 
 ## 2. System map
 
-```
-┌────────────────────────────────────────────────────────────────────┐
-│ CLIENT — Expo / React Native (iOS, Android) · Vite + React (web)   │
-│                                                                    │
-│  screens (expo-router)   board (Skia)   components (packages/ui)   │
-│           │                   │                  │                 │
-│           └───────────────────┴──────────────────┘                 │
-│                               │                                    │
-│                      stores (Zustand) — holds state, owns no rules │
-│                               │                                    │
-│           ┌───────────────────┴────────────────────┐               │
-│           │      packages/engine  (PURE TS)        │  ⭐            │
-│           │  board · equation · generator · solver │               │
-│           │  validator · refill · difficulty       │               │
-│           │  scoring · mastery · state machine     │               │
-│           └───────────────────┬────────────────────┘               │
-│                               │                                    │
-│         packages/client-data — SQLite repositories + sync outbox   │
-└───────────────────────────────┬────────────────────────────────────┘
-                                │ HTTPS, batched, idempotent
-┌───────────────────────────────┴────────────────────────────────────┐
-│ BACKEND — Supabase                                                 │
-│  Auth (parent phone OTP)  ·  Postgres + RLS  ·  Edge Functions     │
-│  consent · sync · reports · privacy export/erase · billing hook    │
-│  Storage: level seed packs, VO packs, data exports                 │
-└────────────────────────────────────────────────────────────────────┘
+```text
+┌──────────────────────────────────────────────────────────────────┐
+│ CLIENT — Flutter (Android, iOS, web)                             │
+│                                                                  │
+│ screens/controllers   Flame board   design system   Rive host    │
+│          │                 │              │             │        │
+│          └─────────────────┴──────────────┴─────────────┘        │
+│                                  │                               │
+│                       flutter game_engine (PURE DART)            │
+│           board · equation · generator · solver · state machine │
+│                                  │                               │
+│                   client_data — SQLite + sync outbox             │
+└──────────────────────────────────┬───────────────────────────────┘
+                                   │ HTTPS, batched, idempotent
+┌──────────────────────────────────┴───────────────────────────────┐
+│ BACKEND — Supabase                                               │
+│ parent auth · Postgres/RLS · Edge Functions · Storage           │
+│ consent · sync · reports · export/erase · billing webhook       │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│ BUILD-TIME ORACLE — existing TypeScript engine and tools         │
+│ emits/validates language-neutral golden fixtures and corpora     │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
-**Children never authenticate.** There is no child credential anywhere in the system. All child data is reached through the parent's session.
-
----
+Children never authenticate. Child rows are reached only through a parent
+session after an immutable consent record exists.
 
 ## 3. Repository layout
 
-```
+```text
 poko/
+├── contracts/                  language-neutral schemas and parity fixtures
+├── flutter/
+│   ├── apps/mobile/            Flutter Android/iOS/web client
+│   └── packages/
+│       ├── game_engine/        pure Dart; zero runtime dependencies
+│       ├── design_system/      tokens and presentational widgets
+│       ├── content/            seed packs, band configs, copy and VO manifest
+│       └── client_data/        SQLite repositories and sync outbox
 ├── packages/
-│   ├── engine/        ⭐ pure TS. Zero runtime dependencies. No UI imports. Ever.
-│   ├── ui/               design tokens + presentational primitives
-│   ├── content/          level seeds, band configs, copy strings, VO manifest
-│   └── client-data/      SQLite schema, repositories, sync outbox
-├── apps/
-│   ├── mobile/           Expo app (iOS + Android)
-│   ├── web/              Vite + React            [v1.1 — scaffolded, not shipped]
-│   └── api/              Supabase project: migrations, RLS policies, Edge Functions
-├── tools/
-│   ├── levelgen/         Node CLI — generates and validates level seed packs
-│   └── fuzz/             Node — property-based solvability harness (CI gate)
-└── docs/                 specs + ADRs
+│   ├── engine/                 completed TypeScript behavioural oracle
+│   ├── content/                current canonical seed/config source
+│   ├── ui/                     current token contract source
+│   └── client-data/            current persistence reference implementation
+├── apps/api/                   Supabase migrations, RLS and Edge Functions
+├── tools/                      TS oracle, fuzz, parity and content tooling
+└── docs/                       specs and ADRs
 ```
 
----
+`contracts/` and `flutter/` are the only new top-level directories authorized by
+ADR-0011. Until the Dart port passes parity, the TypeScript packages remain the
+source used to generate fixtures. After parity, a separate ADR may retire or
+archive reference implementations; no silent deletion is allowed.
 
-## 4. Package dependency rule
+## 4. Dependency rule
 
+```text
+flutter/apps/mobile ──┬──► design_system
+                     ├──► content ───────► game_engine
+                     ├──► client_data ───► game_engine
+                     └──► game_engine
+
+flutter/packages/game_engine ──► Dart core only
+apps/api ───────────────────────► no client package
+
+tools/parity ──► TS engine + contracts + Dart engine command adapter
+TS engine ─────► JavaScript standard library only
 ```
-        apps/mobile ──┬──► packages/ui
-        apps/web    ──┤
-                      ├──► packages/client-data ──► packages/engine
-                      ├──► packages/content ──────► packages/engine
-                      └──► packages/engine
 
-        tools/*     ──────► packages/engine
-        apps/api    ──────► (nothing in this repo — standalone)
-```
-
-**Arrows point one way only. There are no upward imports.**
-
-| Package       | May import                       | May NOT import                                                     |
-| ------------- | -------------------------------- | ------------------------------------------------------------------ |
-| `engine`      | **nothing** (stdlib only)        | React, React Native, Expo, our other packages, any npm runtime dep |
-| `ui`          | React, RN, `engine` types only   | app code, client-data, content                                     |
-| `content`     | `engine`                         | React, RN, UI, app code                                            |
-| `client-data` | `engine`, sqlite driver          | React components, UI                                               |
-| `apps/*`      | everything above                 | each other                                                         |
-| `tools/*`     | `engine`, `content`, node stdlib | React, RN, UI, apps                                                |
-
-Enforced by `.dependency-cruiser.js`. A violation fails CI (`pnpm depcruise`).
-
----
+Flutter widgets, Flame, Rive, SQLite, Supabase clients, clocks, and randomness are
+forbidden from `flutter/packages/game_engine`. Dart import-boundary checks and the
+existing TypeScript dependency-cruiser both fail CI on violations.
 
 ## 5. Layer model
 
-The ten logical layers from the product spec, mapped onto real packages:
+|   # | Layer                                  | Production location                     |
+| --: | -------------------------------------- | --------------------------------------- |
+|   1 | Screens, board, HUD, gestures          | `flutter/apps/mobile/lib/`              |
+|   2 | Board grid, adjacency, gravity, refill | `flutter/packages/game_engine/lib/src/` |
+|   3 | Exact equation evaluation and validity | `flutter/packages/game_engine/lib/src/` |
+|   4 | Solution-first generator and decoys    | `flutter/packages/game_engine/lib/src/` |
+|   5 | Solver and solvability validator       | `flutter/packages/game_engine/lib/src/` |
+|   6 | Difficulty and target selection        | `flutter/packages/game_engine/lib/src/` |
+|   7 | Mastery, scoring, pure state machine   | `flutter/packages/game_engine/lib/src/` |
+|   8 | Progress/rewards and persistence       | `game_engine` + `client_data`           |
+|   9 | Parent dashboard, privacy, billing     | Flutter parent routes + `apps/api`      |
+|  10 | Audio and accessibility services       | `flutter/apps/mobile/lib/services/`     |
 
-| #   | Layer                                                      | Lives in                                     |
-| --- | ---------------------------------------------------------- | -------------------------------------------- |
-| 1   | UI — screens, board renderer, HUD, gestures                | `apps/mobile/src/{app,board,components}`     |
-| 2   | Board engine — grid, adjacency, swap, gravity, refill      | `packages/engine/{board,refill}.ts`          |
-| 3   | Equation engine — evaluation, precedence, validity         | `packages/engine/{equation,num}.ts`          |
-| 4   | Puzzle generator — solution-first construction, decoys     | `packages/engine/generator.ts`               |
-| 5   | Puzzle validator — solvability proof, accidental solutions | `packages/engine/{solver,validator}.ts`      |
-| 6   | Difficulty manager — scoring, band rules, curves           | `packages/engine/difficulty.ts`              |
-| 7   | Adaptive engine — mastery model, scheduler, target picker  | `packages/engine/{mastery,target}.ts`        |
-| 8   | Progress & reward — stars, coins, badges, streaks          | `packages/engine/scoring.ts` + `client-data` |
-| 9   | Parent dashboard — reports, controls, privacy, billing     | `apps/mobile/src/app/parent/*` + `apps/api`  |
-| 10  | Audio & accessibility services                             | `apps/mobile/src/services/*`                 |
+Layers 2–7 are pure Dart. UI code may render decisions but never make them.
 
-Layers 2–7 are entirely inside `engine`. That is the point.
+## 6. Where code goes
 
----
+| Writing…                                        | Put it in                             | Never in                            |
+| ----------------------------------------------- | ------------------------------------- | ----------------------------------- |
+| A rule about a valid move or next state         | Dart `game_engine`                    | widget, controller, Flame component |
+| A gameplay number or exact equation             | Dart `game_engine` using `Num`        | raw floating-point UI value         |
+| Randomness                                      | seeded `game_engine` RNG              | `Random()` at a call site           |
+| A colour, spacing, radius, font or motion token | `design_system/lib/src/tokens.dart`   | widget literals                     |
+| Reusable game-agnostic widget                   | `design_system`                       | mobile feature folder               |
+| Tile, target, chain or reward presentation      | `flutter/apps/mobile/lib/game/`       | `design_system`                     |
+| Board render/update or gestures                 | `flutter/apps/mobile/lib/game/board/` | screen/controller                   |
+| Route or screen                                 | `flutter/apps/mobile/lib/features/`   | engine/package internals            |
+| Persisted data                                  | `client_data` repository              | widget/controller/service           |
+| Network call                                    | mobile sync service or `apps/api`     | child widget or engine              |
+| Language-neutral parity fixture/schema          | `contracts/`                          | generated build directory           |
+| Migration or RLS policy                         | `apps/api/migrations/`                | client code                         |
+| Unknown category                                | ask or write an ADR                   | an unreviewed top-level folder      |
 
-## 6. Where does this code go?
-
-The decision table. Consult this before creating any file.
-
-| If you are writing…                                    | It goes in                                       | Never in                       |
-| ------------------------------------------------------ | ------------------------------------------------ | ------------------------------ |
-| A rule about what counts as a valid move               | `engine/equation.ts`                             | a component, a store, a hook   |
-| Anything that decides _what the player sees next_      | `engine/`                                        | the screen that renders it     |
-| A number that affects gameplay                         | `engine/` using `Num`                            | anywhere as a raw `number`     |
-| Randomness of any kind                                 | `engine/rng.ts`, seeded                          | `Math.random()`, anywhere      |
-| A colour, spacing value, radius, or font size          | `packages/ui/tokens.ts`                          | inline styles, component files |
-| A reusable visual element with no game knowledge       | `packages/ui/`                                   | `apps/mobile/src/components`   |
-| A visual element that knows about tiles/targets/chains | `apps/mobile/src/components/`                    | `packages/ui`                  |
-| Board drawing or gesture handling                      | `apps/mobile/src/board/`                         | components, screens            |
-| A screen or route                                      | `apps/mobile/src/app/`                           | anywhere else                  |
-| Reading or writing persisted data                      | `packages/client-data/` repositories             | components, screens, services  |
-| A network call                                         | `apps/mobile/src/services/sync.ts` or `apps/api` | components, engine             |
-| Level definitions                                      | `packages/content/levels/*.json` as **seeds**    | hand-authored boards           |
-| A migration or RLS policy                              | `apps/api/migrations/`                           | client code                    |
-| Something you're not sure about                        | ask, or write an ADR                             | a new top-level folder         |
-
-**Heuristic:** if a rule would still be true in a text-only version of this game with no screen, it belongs in `engine`.
-
----
+Heuristic: if the rule remains true in a text-only game, it belongs in
+`game_engine` and must be represented in parity fixtures.
 
 ## 7. Invariants
 
-Numbered so ADRs, lint rules, PR reviews and commit messages can reference them ("violates INV-4").
-
-| ID         | Invariant                                                                                            | Enforced by                                           |
-| ---------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| **INV-1**  | `packages/engine` imports nothing outside the stdlib                                                 | dependency-cruiser                                    |
-| **INV-2**  | Game rules exist only in `engine`. Components and stores contain no rules                            | dependency-cruiser + engine coverage ≥90%             |
-| **INV-3**  | All randomness flows through `rng.ts` with an explicit seed                                          | ESLint ban on `Math.random()` + golden-seed snapshots |
-| **INV-4**  | Gameplay values use the `Num` type. Never a raw float                                                | type system + ESLint                                  |
-| **INV-5**  | `dispatch(state, action)` is a **pure reducer** — no I/O, no `Date.now()`, no mutation               | unit tests + review                                   |
-| **INV-6**  | Every reachable board state has **at least one solution** for its current target                     | `pnpm fuzz` — 100k property-tested states             |
-| **INV-7**  | Game state is fully serialisable; `serialise → restore` is lossless                                  | round-trip property test                              |
-| **INV-8**  | The app is fully playable with the network permanently off                                           | E2E airplane-mode suite                               |
-| **INV-9**  | SQLite on device is the source of truth; the server is a sync target                                 | architecture review                                   |
-| **INV-10** | No child data is processed before a valid `consent_record` exists                                    | server-side check in every child-data Edge Function   |
-| **INV-11** | No child's full date of birth is stored anywhere. Birth **year** only                                | schema + migration review                             |
-| **INV-12** | No third-party analytics or ad SDK exists in the child zone; telemetry is device-side aggregate only | dependency audit in CI                                |
-| **INV-13** | Every visual token comes from `tokens.ts`                                                            | ESLint hex-literal ban                                |
-| **INV-14** | Every interactive element in the child zone is ≥64×64 px                                             | component tests                                       |
-| **INV-15** | The engine's public API changes only via a reviewed diff                                             | API surface snapshot test                             |
-
----
+| ID         | Invariant                                                                                               | Mechanical enforcement                     |
+| ---------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| **INV-1**  | Both production Dart engine and TS oracle import no runtime dependency outside their standard libraries | Dart import audit + dependency-cruiser     |
+| **INV-2**  | Game rules exist only in `game_engine`; widgets, controllers and Flame components contain none          | import audit + engine coverage + review    |
+| **INV-3**  | All randomness has an explicit seed and matches the golden corpus                                       | banned unseeded RNG + parity snapshots     |
+| **INV-4**  | Gameplay values use the exact `Num` value type, never a float                                           | analyzer/lints + tests                     |
+| **INV-5**  | `dispatch(state, action)` is pure: no I/O, clock, global state or mutation                              | property tests + review                    |
+| **INV-6**  | Every reachable board state has at least one solution                                                   | 100,000-state Dart fuzz + TS parity corpus |
+| **INV-7**  | Game state serializes/restores losslessly and canonically                                               | cross-language round-trip fixtures         |
+| **INV-8**  | The app is fully playable with the network permanently off                                              | airplane-mode E2E                          |
+| **INV-9**  | SQLite is the device source of truth; server is a sync target                                           | architecture test/review                   |
+| **INV-10** | No child data is processed before valid consent                                                         | server attack suite                        |
+| **INV-11** | No full child date of birth is stored; birth year only                                                  | schema constraint + migration review       |
+| **INV-12** | No third-party analytics/ad SDK in the child zone                                                       | dependency audit                           |
+| **INV-13** | Every visual token comes from the Dart token contract                                                   | custom lint + widget tests                 |
+| **INV-14** | Every child-zone interactive target is at least 64×64 logical pixels                                    | widget semantics tests                     |
+| **INV-15** | Dart engine public API and parity schema change only through reviewed snapshots                         | API/schema snapshot tests                  |
 
 ## 8. Core data flows
 
-### 8.1 Gameplay tick (the hot path — runs hundreds of times per session)
+### Gameplay tick
 
-```
-finger moves
-  → Reanimated worklet (UI thread) updates the drag path        ← no React render
-  → on cell entry: engine.dispatch(EXTEND_CHAIN)                 ← pure, <1ms
-  → equation preview recomputed, rendered on the Skia canvas
+```text
+pointer moves
+  → Flame input handler updates drag path in the game loop
+  → on cell entry: gameEngine.dispatch(extendChain)
+  → board paints equation preview in the same render surface
 release
-  → engine.dispatch(COMMIT)
-     ├─ chain ≠ target → REJECTING → back to READY (no penalty, no move cost)
-     └─ chain = target → RESOLVING → REFILLING → TARGET_ROTATING → READY
-                             │
-                             ├─ removeTiles → applyGravity
-                             ├─ selectTarget(learnerModel)     weak skills weighted ×3
-                             ├─ solution-aware refill: seed → repair → tideShuffle
-                             └─ solver.analyse() asserts ≥1 solution      [INV-6]
-  → state persisted to SQLite on return to READY                 [INV-7]
-  → attempt row queued to the sync outbox
+  → gameEngine.dispatch(commit)
+     ├─ invalid target → rejecting → ready
+     └─ valid target → resolving → refilling → targetRotating → ready
+                         ├─ remove + gravity
+                         ├─ weak-skill-weighted target selection
+                         ├─ seeded refill → repair → tide shuffle
+                         └─ solver asserts at least one solution
+  → canonical state saved to SQLite on ready
+  → attempt queued in sync outbox
 ```
 
-`RESOLVING → REFILLING → TARGET_ROTATING` is **atomic in the engine** even though the UI animates it over ~700 ms. Input is accepted only in `READY`, `DRAGGING`, `PREVIEWING`.
+The engine transition is atomic even when Flutter animates it over several frames.
+Input is accepted only in ready, dragging, and previewing phases.
 
-### 8.2 Persistence and sync
+### Persistence and sync
 
-```
-engine state ──► repository ──► SQLite (source of truth)  [INV-9]
-                                   │
-                                   └─► outbox row (uuid + updated_at)
-                                            │
-                       connectivity ────► POST /sync (batch)
-                                            │
-                            server applies idempotently, last-write-wins
-                            on updated_at; progress resolves "best wins"
-                                            │
-                                   ◄── server changes since cursor ──► merge
+```text
+engine state → repository → SQLite → UUID outbox row
+                                      │
+connectivity → batched POST /sync ────┘
+server applies idempotently and returns changes since cursor → local merge
 ```
 
-### 8.3 Consent and auth (blocking — nothing child-related happens before it completes)
+### Consent and auth
 
+```text
+phone → OTP → parent session → consent screen → immutable consent_record
+                                                   │
+                                     only then ─────┴→ child_profile
 ```
-phone → OTP → parent session → CONSENT SCREEN → consent_record (immutable, append-only)
-                                                        │
-                                          ── only now ──┴──► child_profile may be created
-```
-
-Enforced server-side, not just in the UI. [INV-10]
-
----
 
 ## 9. State ownership
 
-Exactly one owner per category. If you need state, find its owner rather than adding a new store.
+| State                                     | Owner                                                       | Persistence             |
+| ----------------------------------------- | ----------------------------------------------------------- | ----------------------- |
+| Board, chain, target, score, moves, phase | immutable `game_engine.LevelState`, held by game controller | SQLite on every ready   |
+| Active child, band, settings              | profile controller                                          | SQLite                  |
+| Mastery, unlocks, wallet, badges          | `client_data` repositories, cached by controllers           | SQLite → sync           |
+| Audio and accessibility                   | dedicated app controllers                                   | SQLite                  |
+| Outbox depth and connectivity             | sync controller                                             | transient               |
+| Subscription and parent settings          | server, cached locally                                      | Postgres + SQLite cache |
 
-| State                                     | Owner                                              | Persisted                |
-| ----------------------------------------- | -------------------------------------------------- | ------------------------ |
-| Board, chain, target, score, moves, phase | `engine.LevelState`, held by `gameSlice`           | SQLite, on every `READY` |
-| Active child, band, tier, settings        | `profileSlice`                                     | SQLite                   |
-| Mastery per skill                         | `client-data` repository, cached in `profileSlice` | SQLite → synced          |
-| Unlocks, streak, wallet, badges           | `metaSlice`                                        | SQLite → synced          |
-| Audio volumes, mute                       | `audioSlice`                                       | SQLite                   |
-| Accessibility variants                    | `a11ySlice`                                        | SQLite                   |
-| Outbox depth, online status               | `syncSlice`                                        | transient                |
-| Parent settings, subscription             | server, cached locally                             | Postgres                 |
+Controllers hold state and forward actions; they own no gameplay rules. The state
+management dependency, if any, requires its own ADR and serialized lockfile edit.
 
-**Stores hold state and forward actions. They contain no rules.** If you write `if (chain.length > 2)` in a store or component, it belongs in the engine. [INV-2]
+## 10. Engine contracts and parity
 
----
+The Dart public surface mirrors the semantics of the accepted TypeScript API:
+create level, dispatch action, serialize/restore, analyze board, generate pack,
+and update mastery. Dart naming may follow language conventions; the
+language-neutral request/response schema in `contracts/` is authoritative for
+cross-language parity.
 
-## 10. The engine contract
+Before the Dart engine becomes production-authoritative it must match:
 
-```ts
-// packages/engine/src/index.ts — the only public surface  [INV-15]
-export function createLevel(seed: number, rules: LevelRules, band: BandConfig): LevelState;
-export function dispatch(state: LevelState, action: GameAction): LevelState; // pure  [INV-5]
-export function serialise(state: LevelState): string;
-export function restore(blob: string): LevelState;
-export function analyse(board: Board, target: Num, rules: LevelRules): Analysis;
-export function generatePack(bandId: string, count: number, seed: number): PuzzleSeed[];
-export function updateMastery(prev: Mastery, attempt: Attempt): Mastery;
-export type { LevelState, GameAction, Board, Tile, Num, LevelRules, BandConfig, Analysis };
-```
+1. golden seed → board snapshots;
+2. action-log → state snapshots at every step;
+3. canonical serialization fixtures;
+4. solver analyses and generated packs;
+5. the same 100,000 seeded reachable-state corpus.
 
-Everything else in `engine` is internal. Consumers import from the package root, never from deep paths.
+Parity compares canonical JSON values, not source structures or debug strings.
+Performance timestamps are tooling metadata and never engine output.
 
-Performance measurements and validation timestamps are tooling metadata, not engine outputs. The
-engine never reads a clock to populate return values; callers benchmark pure calls externally. [INV-5]
+## 11. Determinism and content
 
-**The type contract (`types.ts` + these signatures) is frozen after Phase 0.** Changing it requires an ADR and a sync point across all active worktrees — see `docs/WORKTREE-PLAN.md` §7.
+A level is `(seed, bandConfig, levelRules)`. The tuple must reproduce the same
+canonical board and engine state in the TypeScript oracle, Dart engine, Android,
+iOS, web, CI, and content tools. Changing RNG consumption or iteration order is a
+breaking content change guarded by golden fixtures.
 
----
-
-## 11. Determinism and the content model
-
-A level **is a seed**. `(seed, bandConfig, levelRules)` reproduces a byte-identical board on every platform, every run, forever.
-
-Consequences worth internalising:
-
-- Level packs are ~12 bytes per level, not 12 KB. They ship in the bundle and update over-the-air.
-- Bug reports are reproducible from a seed and an action log.
-- Scores are verifiable server-side by replaying the action log through the same pure reducer.
-- Daily challenges are shareable: everyone gets the identical board from one seed.
-- **Any change to iteration order or RNG consumption in the engine silently changes every existing level.** This is why golden-seed snapshot tests exist. [INV-3]
-
----
+Seed packs remain small and auditable. Arbitrary runtime seeds must be validated;
+production content is drawn from validated packs, not assumed safe statistically.
 
 ## 12. Backend
 
-Deliberately small — roughly 800–1,200 lines total for v1. The game runs entirely on-device; the server does five things:
+The game is fully on-device. Supabase provides parent phone auth, immutable
+consent, idempotent sync, reports, privacy export/erase, Storage, RLS, and the
+billing webhook. RLS is mandatory on every table. V1 has no realtime gateway,
+runtime AI, vector database, microservices, leaderboard, or level-content API.
 
-| Concern     | Implementation                                          |
-| ----------- | ------------------------------------------------------- |
-| Parent auth | Supabase Auth, phone OTP. No child credentials [INV-10] |
-| Consent     | Edge Function → append-only `consent_record`            |
-| Sync        | Edge Function, batched, idempotent                      |
-| Reports     | Edge Function, plain-language weekly rollup             |
-| Privacy     | Export + erase Edge Functions (DPDP data rights)        |
-| Billing     | RevenueCat webhook → `subscription`                     |
+## 13. Planned extension points — do not build in v1
 
-**RLS on every table, no exceptions.** Parents reach child rows only through `child_profile.parent_id = auth.uid()`.
-
-**Not built, and not to be built in v1:** realtime gateway, AI orchestration, pgvector, microservices, leaderboards, level content API.
-
----
-
-## 13. Extension points (v2/v3) — **do not build yet**
-
-Designed for, deliberately absent. Marked here so nobody designs them out by accident.
-
-| Future               | Where it attaches                                                                 | Guard                                                                                                              |
-| -------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Story episodes       | `content` gains `episodes/`; a `StoryPlayer` sits beside `board/`                 | Episode → puzzle binding is one-way: story declares `target_skills` + narrative target, the generator satisfies it |
-| Session ribbon       | Ribbon state machine joins `engine/machine.ts`                                    | Ribbon phases wrap level phases; level machine is unchanged                                                        |
-| Fractions / decimals | `num.ts` swaps its integer backing for full rational arithmetic                   | **Every signature already takes `Num`, so no call site changes** [INV-4]                                           |
-| Voice input          | New service; `engine` exposes the expected-answer set per beat                    | Constrained recognition only; tap fallback is permanent                                                            |
-| Live AI tutor        | New realtime gateway + orchestration service, outside this repo's client packages | Engine stays pure; AI never mutates game state directly                                                            |
-| Web                  | `apps/web` imports the same `engine` and most of `ui`                             | Already scaffolded; keep `ui` free of RN-only APIs where practical                                                 |
-
----
+Story episodes, session ribbon, fractions/decimals, constrained voice input, and
+a live tutor remain planned. They attach through engine/content contracts and may
+not mutate game state from UI or AI services. Flutter web is the default shared
+web path after ADR-0011; a separate web stack requires a later ADR.
 
 ## 14. Performance budgets
 
-Measured on the reference device (Redmi-class Android, 3–4 GB RAM), not a simulator.
+Qualification runs on both ADR-0010 physical phones at verified 60 Hz.
 
-| Budget                    | Target                     |
-| ------------------------- | -------------------------- |
-| Board frame time          | < 16 ms sustained (60 fps) |
-| `analyse()` on 8×8        | < 5 ms                     |
-| Full refill cycle compute | < 40 ms                    |
-| Cold start → playable     | < 6 s                      |
-| Warm start → Continue     | < 2 s                      |
-| Install size              | < 80 MB                    |
-| Memory ceiling            | < 220 MB                   |
+| Budget                 |  Target |
+| ---------------------- | ------: |
+| Board frame CPU P95    |  <16 ms |
+| Frame overrun P95      |   ≤0 ms |
+| Janky/missed frames    |     <1% |
+| `analyse()` on 8×8     |   <5 ms |
+| Full refill compute    |  <40 ms |
+| Cold start to playable |    <6 s |
+| Warm start to Continue |    <2 s |
+| Install size           |  <80 MB |
+| Process PSS            | <220 MB |
 
-Board rendering is **one Skia canvas with a pre-rendered tile atlas**, not 64 React views. Drag runs in Reanimated worklets on the UI thread; React re-renders only on state transitions.
-
----
+The board is one Flame render surface and update loop, not 64 independently
+rebuilding widgets. Rive characters remain outside the puzzle engine and must be
+included in the controlled Gate 2 workload.
 
 ## 15. Security and privacy boundaries
 
-- The child zone has **no path** to the network, billing, external links, or another child's data.
-- The parent gate is the only door and is one-way: leaving the parent zone returns to Profile Select, never into a child session.
-- Telemetry is aggregated **on device** and uploaded as day-level rollups. No event streams, no third-party SDK in the child zone. [INV-12]
-- Crash reporting runs with PII scrubbing on and no child identifiers attached.
-- Agents and developers use a **local/dev Supabase project**. Production credentials never enter a development environment.
+The child zone has no network, billing, external-link, or cross-child-data path.
+Telemetry is aggregated on-device and uploaded only as day-level rollups. Crash
+reporting must scrub PII and attach no child identifier. Development uses only a
+local/dev Supabase project; production credentials never enter development.
 
----
+## 16. Change protocol
 
-## 16. Glossary
+1. Consult §6 before adding a file.
+2. Any dependency requires an ADR; `game_engine` and the TS oracle accept none.
+3. Changing a public engine API or parity schema requires an ADR and worktree sync.
+4. Breaking an invariant requires an ADR plus enforcement update in the same PR.
+5. Architecture changes land with the code/config they govern.
+6. Do not delete the TS oracle or reference packages until parity has passed and a
+   retirement ADR names what replaces every consumer.
 
-| Term           | Meaning                                                                          |
-| -------------- | -------------------------------------------------------------------------------- |
-| **Band**       | Skill difficulty tier (1–5). Procedural, cheap, fine-grained                     |
-| **Tier**       | Narrative maturity tier (1–3). Authored, expensive, coarse                       |
-| **Chain**      | An ordered path of adjacent same-colour tiles forming one equation               |
-| **Target**     | The number the current chain must equal. Changes after every solve               |
-| **Beat**       | A discrete interaction moment inside an episode **[v2]**                         |
-| **Ribbon**     | The single daily session: episode → puzzle → resolution → wind-down **[v2]**     |
-| **Seed**       | The integer that deterministically reproduces a board                            |
-| **Setup move** | A swap required before any solution becomes reachable. The main difficulty lever |
-| **Sumling**    | A number creature; a tile                                                        |
-
----
-
-## 17. Change protocol
-
-1. **Adding a file** — consult §6. If it doesn't fit any row, that's a signal to ask, not to invent a folder.
-2. **Adding a dependency** — ADR required. `engine` accepts none, ever. [INV-1]
-3. **Changing the engine's public API or `types.ts`** — ADR + a sync point across active worktrees.
-4. **Breaking an invariant** — not a code change, an ADR. If the ADR is accepted, update §7 and the enforcement mechanism in the same PR.
-5. **Changing this document** — in the same PR as the code it describes. A doc that lags the code is worse than no doc, because agents will trust it.
-
-```
-
-```
-
----
-
-_Last reviewed: at Phase 0 completion. Re-review at each gate._
+_Last reviewed: ADR-0011 Flutter rebaseline, 2026-08-14._

@@ -1,164 +1,160 @@
 # Build plan — Poko's World v1
 
-|                  |                                                        |
-| ---------------- | ------------------------------------------------------ |
-| **Status**       | Canonical implementation inventory                     |
-| **Execution**    | Follow `WORKTREE-PLAN.md` for ownership and sequencing |
-| **Architecture** | Follow `ARCHITECTURE.md`; invariants are release gates |
+|                  |                                                                     |
+| ---------------- | ------------------------------------------------------------------- |
+| **Status**       | Canonical implementation inventory; Flutter-rebaselined by ADR-0011 |
+| **Execution**    | Follow `WORKTREE-PLAN.md` for ownership and sequencing              |
+| **Architecture** | Follow `ARCHITECTURE.md`; invariants are release gates              |
 
-## 1. Foundation and shared contracts
+## 1. Completed foundation and oracle
 
-### 1.1 Repository
+Phase 0 produced the pnpm/Turborepo repository, strict TypeScript guardrails,
+frozen contracts, CI, specs, and architecture rules. Phase 1 completed the pure
+TypeScript engine plus independent verification:
 
-- pnpm workspaces and Turborepo;
-- strict shared TypeScript configuration;
-- ESLint, Prettier, commitlint, Husky, lint-staged;
-- dependency-cruiser, Knip, Vitest coverage, and CI;
-- package-level `AGENTS.md` where a boundary needs additional rules.
+- deterministic exact-number board/equation engine;
+- solution-first generator, solver, validator, refill and state machine;
+- canonical serialization, golden seeds and API snapshot;
+- at least 90% engine coverage and the 100,000-board solvability gate;
+- content, client-data, UI token, Gate 2 parser and verification packages.
 
-### 1.2 Pure engine contract
+Gate 1 is green. After ADR-0011 this implementation is the behavioural oracle for
+the Dart port, not the production client runtime.
 
-`packages/engine/src/types.ts` and the signatures exported from `index.ts` are
-frozen at Phase 0. Implementations arrive behind those signatures. Public imports
-use `@poko/engine`; deep imports are forbidden outside the engine package.
+## 2. Completed architecture gate
 
-### 1.3 Content contract
+The React Native Rive contingency is closed. Five controlled iterations on each
+ADR-0010 model were functionally stable but missed frame budgets. ADR-0011 selects
+Flutter + Flame + the official Rive Flutter runtime. Exact results and retained
+artifacts are in `06-rive-spike-results.md`.
 
-Content supplies seeds, band configuration, level rules, copy, and VO manifests.
-It never supplies a hand-authored board or bypasses engine validation.
+No React Native scaffold, dependency, Skia renderer, or Reanimated code may be
+merged. Existing spike branches are evidence only.
 
-### 1.4 Design tokens
+## 3. Phase 1F — Flutter foundation and engine parity
 
-`packages/ui/src/tokens.ts` is the only source of colour, spacing, radius, type,
-font, touch, and motion values. Existing token values are frozen; additions are
-reviewable contract changes.
+### 3.1 Serialized foundation
 
-### 1.5 Component library
+One phase owner creates, before parallel feature work:
 
-Phase 2 builds presentational primitives in `packages/ui` with no game, store,
-navigation, persistence, or network knowledge:
+- `flutter/` workspace with pinned Flutter/Dart SDK and locked dependencies;
+- `contracts/` with versioned language-neutral schemas and oracle fixtures;
+- strict analyzer/lint rules, formatter, unit/widget/Golden test setup and CI;
+- Flutter/Dart `AGENTS.md` and scoped rules that replace RN-only paths and commands;
+- empty package boundaries from `ARCHITECTURE.md` §3;
+- dependency/import audits for the pure Dart engine;
+- managed-device Macrobenchmark integration point in the Android host;
+- frozen Dart `Num`, engine public API and design-token contract.
 
-- layout: `Stack`, `Inline`, `Box`, `SafeArea`;
-- typography: `Text`, `Heading`, `NumberDisplay`;
-- actions: `Button`, `IconButton`, `AudioButton`, `Toggle`;
-- containers: `Card`, `Sheet`, `Dialog`, `Banner`;
-- feedback: `ProgressBar`, `Spinner`, `Badge`, `Toast`;
-- identity/decorative: `Avatar`, `Icon`, `OperationMark`;
-- accessibility helpers: `SpokenLabel`, `FocusRing`, `HitTarget`.
+Every third-party package requires an ADR. Foundation chooses only the minimum
+needed to establish Flutter, Flame, Rive, test infrastructure, local persistence,
+and the app shell; screen/navigation conveniences wait until their phase.
 
-Each primitive supports relevant large-text, reduced-motion, high-contrast,
-left-handed, colour-vision, and dyslexia-font variants. Game-aware tile, target,
-chain, HUD, and reward components remain in `apps/mobile/src/components`.
+### 3.2 Dart engine port
 
-## 2. Phase 0 — foundation
+Port behind the frozen Dart surface in dependency order:
 
-Deliver the repository, guardrails, documentation, frozen engine/UI contracts,
-exact `Num`, deterministic RNG, golden-seed test, and typed Gate 1 harness.
+1. exact `Num`, deterministic RNG and canonical JSON codec;
+2. board, coordinates, adjacency and chain operations;
+3. equation evaluation and validation;
+4. solver and performance distribution;
+5. generator, validator, gravity, refill, repair and tide shuffle;
+6. difficulty, target selection, mastery, scoring and pure state machine;
+7. serialization/restore and action-trace replay.
 
-**Gate:** `pnpm install --frozen-lockfile` and `pnpm verify` pass with Phase 1
-engine functions still throwing `NotImplementedError`.
+The port may read TypeScript source for intent but is judged only by public
+language-neutral fixtures. It must not call Node, JavaScript, FFI, WebView, or a
+network service at runtime.
 
-## 3. Phase 1 — engine and independent verification
+### 3.3 Independent parity verification
 
-### Engine worktree
+The verification owner expands `contracts/` and `tools/parity` without editing
+the Dart engine. It exports fixtures from the accepted TypeScript oracle and
+compares canonical Dart output for golden seeds, action logs, serialization,
+analysis, packs, and the 100,000-state corpus.
 
-Owns `packages/engine/src/**`, including colocated internal unit tests. Build in
-dependency order:
+**Gate 1F:** both language toolchains are green; all parity fixtures match; Dart
+engine coverage is at least 90%; 100,000 Dart states have zero unsolvable boards;
+`analyse()` P95 is below 5 ms on the pinned CI runner; serialization is lossless;
+an offline app-shell smoke starts on Android.
 
-1. board representation, coordinates, adjacency, chain operations;
-2. equation evaluation and validation;
-3. solver and performance test;
-4. solution-first generator and golden generated seeds;
-5. validator, gravity, solution-aware refill, repair, and tide shuffle;
-6. difficulty, target selection, mastery, scoring, and pure state machine;
-7. serialization/restore and reducer property tests.
+## 4. Phase 2 — Flutter board renderer and design system
 
-### Verification worktree
+- `flutter/apps/mobile/lib/game/board`: one Flame game/render loop, tile atlas,
+  pointer/drag path, refill, target rotation, particles and Rive host composition;
+- `flutter/packages/design_system`: layout, typography, actions, containers,
+  feedback, identity and accessibility widgets;
+- app shell sufficient to execute the managed-device performance script;
+- AndroidX Macrobenchmark target/test APKs retained with exact hashes.
 
-Owns `tools/verify`, `tools/fuzz`, and `tools/levelgen`. It tests only the frozen
-package-root API and never edits engine files. It builds black-box contract and
-property suites, the 100k-state solvability gate, API snapshot, determinism
-snapshots, and pack generation CLI.
+Before feature code, land the scripted drag → commit → refill → target rotation
+measurement, 64×64 hit-target helper, and accessibility variant harness.
 
-**Gate 1:** `pnpm verify:gate1`, engine coverage ≥90%, 100,000 generated boards
-with zero unsolvable, `analyse()` under 5 ms on 8×8, reducer purity, and lossless
-serialization.
+**Gate 2:** both ADR-0010 physical models complete at least five measured
+iterations at verified 60 Hz with frame CPU P95 <16 ms, overrun P95 ≤0 ms,
+<1% janky frames, process PSS <220 MB, complete traces, stable process identity,
+and all engine/UI assertions passing.
 
-## 4. Phase 2 — board renderer and UI
+## 5. Phase 3 — screens, persistence and backend
 
-- `apps/mobile/src/board`: one Skia canvas, tile atlas, Reanimated gesture path,
-  particles, refill and target-transition animation;
-- `packages/ui`: §1.5 primitives and accessibility variants;
-- app shell sufficient to run the board performance harness.
-
-**Gate 2:** sustained 60 fps drag and refill on the reference low-end Android device.
-
-## 5. Phase 3 — screens, persistence, and backend
-
-- child route group and eleven screen responsibilities from `01-experience-spec.md`;
-- Zustand slices that hold state and forward engine actions without rules;
-- SQLite schema, repositories, migration runner, and sync outbox;
-- Supabase schema, RLS, consent, sync, reports, export, erase, and billing webhook;
+- child feature routes and eleven responsibilities from `01-experience-spec.md`;
+- controllers that hold state and forward pure engine actions without rules;
+- Dart SQLite schema, repositories, migration runner and sync outbox;
+- Supabase schema, RLS, consent, sync, reports, export, erase and billing webhook;
 - local/dev Supabase configuration and cross-account attack tests.
 
-**Gate 3:** airplane-mode session syncs once on reconnect and cross-account RLS
-tests cannot access another parent's rows.
+**Gate 3:** full airplane-mode session syncs exactly once on reconnect; consent
+attack is rejected server-side; cross-account RLS cannot read another parent's
+rows; full birth date is structurally unstorable.
 
 ## 6. Phase 4 — content and parent zone
 
-- at least 50 validated level seeds, five band configs, copy, VO manifest, and
-  human-reviewed monotonic difficulty curve;
-- seven parent-zone responsibilities from `01-experience-spec.md`, including
-  consent, reports, controls, subscription state, export, and erasure.
+- at least 50 oracle-validated seed records and five band configs, imported through
+  parity-tested Dart content readers;
+- copy, VO manifest and human-reviewed monotonic difficulty curve;
+- seven Flutter parent-zone responsibilities including consent, reports,
+  controls, subscription, export and erasure.
 
-**Gate:** content QA passes and parent onboarding through consent completes
+**Gate:** content QA and parity pass; parent onboarding through consent completes
 unaided in under three minutes.
 
 ## 7. Phase 5 — integration
 
-Integrate audio, tutorial, accessibility, onboarding polish, art/Rive assets,
-performance, background/restore behaviour, device matrix, and offline recovery.
-This phase is single-threaded except for an isolated audio service worktree.
+Integrate audio, tutorial, accessibility, onboarding polish, final Rive rigs,
+particles, island art, background/restore, offline recovery and device sweep.
+Work is single-threaded except for a strictly isolated audio worktree.
 
 ## 8. Phase 6 — beta and launch
 
-Run beta triage single-threaded, privacy/security review, store compliance,
-performance regression, crash recovery, data export/erase exercises, release
-candidate signing, and rollback rehearsal.
+Run beta triage single-threaded, privacy/security review, child-store compliance,
+performance regression, crash recovery, data export/erase exercises, signing and
+rollback rehearsal.
 
 ## 9. Task contract
 
-Every implementation task declares:
-
-```text
-May edit:      exact owned paths
-May read:      dependencies and relevant specs
-Do NOT touch:  neighbouring owner paths and frozen contracts
-Acceptance:    commands, tests, budgets, and observable behaviour
-```
-
-An owner may read the entire repository but writes only the declared paths.
-Dependency, lockfile, frozen contract, and CI changes are serialized through the
-Phase owner.
+Every task declares exact editable paths, readable dependencies, forbidden paths,
+acceptance commands, budgets and observable behavior. Dependency locks, SDK pins,
+CI, frozen contracts and generated parity baselines are serialized through the
+phase owner.
 
 ## 10. Verification matrix
 
-| Concern                        | Mechanical check                                       |
-| ------------------------------ | ------------------------------------------------------ |
-| Type safety                    | `pnpm typecheck`                                       |
-| Conventions and invariant bans | `pnpm lint`                                            |
-| Package boundaries             | `pnpm depcruise`                                       |
-| Unit/property coverage         | `pnpm test`                                            |
-| Unused code/dependencies       | `pnpm knip`                                            |
-| Phase 0 aggregate              | `pnpm verify`                                          |
-| Gate 1 aggregate               | `pnpm verify:gate1`                                    |
-| Device interaction             | Detox/physical-device suites added with the mobile app |
-| Data isolation                 | Supabase RLS attack suite added with the API           |
+| Concern                         | Mechanical check                                       |
+| ------------------------------- | ------------------------------------------------------ |
+| TypeScript oracle               | `pnpm verify:gate1`                                    |
+| Flutter analysis and formatting | pinned Flutter commands from `flutter/README.md`       |
+| Dart unit/widget coverage       | `flutter test --coverage` through the workspace runner |
+| Import/dependency boundaries    | Dart import audit + TypeScript dependency-cruiser      |
+| Cross-language behavior         | `tools/parity` canonical fixture comparison            |
+| Dart solvability                | 100,000-state seeded fuzz gate                         |
+| Device interaction/performance  | managed physical Macrobenchmark suites                 |
+| Data isolation and consent      | Supabase attack suite                                  |
+
+The concrete Flutter commands are frozen with the Phase 1F scaffold, not guessed
+in advance of the SDK/package-manager decision.
 
 ## 11. External readiness
 
-Before board/rendering commitment, complete the Rive React Native spike required
-by ADR-0001 on the reference Android device. Before public beta, complete Indian
-privacy counsel review, child/family store-policy review, and trademark clearance.
-These owner actions are tracked outside the code repository and cannot be
-substituted by passing CI.
+Managed-device access is ready and ADR-0011 is resolved. Before public beta,
+complete Indian privacy counsel review, child/family store-policy review and
+trademark clearance. These owner actions cannot be substituted by passing CI.

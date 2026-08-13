@@ -4,7 +4,7 @@
 | ------------ | ---------------------------------------------------------------------- |
 | **Status**   | Canonical readiness strategy from Gate 1 to launch                     |
 | **Audience** | Owner, engineering, QA, content                                        |
-| **Related**  | `03-build-plan.md` · `WORKTREE-PLAN.md` · `ARCHITECTURE.md` · ADR-0001 |
+| **Related**  | `03-build-plan.md` · `WORKTREE-PLAN.md` · `ARCHITECTURE.md` · ADR-0011 |
 
 `03-build-plan.md` says _what_ to build and `WORKTREE-PLAN.md` says _who builds it
 where_. This document says **what must be true before each phase starts**, and what
@@ -21,9 +21,9 @@ Phase 0 and Phase 1 are complete. Gate 1 is green: engine coverage ≥90%, 100,0
 generated boards with zero unsolvable [INV-6], `analyse()` inside its 5 ms budget,
 reducer purity and lossless serialisation proven.
 
-What exists: `packages/engine`, `packages/ui/src/tokens.ts`, and the three
-verification tools. What does not exist: **`apps/` is empty**, and `packages/ui`
-contains no primitives — zero of the components in `03-build-plan.md` §1.5.
+What exists: `packages/engine`, content/client-data references,
+`packages/ui/src/tokens.ts`, verification tools, and retained two-model Rive
+evidence. What does not exist: **the production Flutter workspace and app**.
 
 The honest reading: the part of the product whose correctness a machine can decide
 is finished. Rendering at 60 fps on low-end Android, offline-first sync, RLS over
@@ -41,13 +41,14 @@ when someone measured it directly (ADR-0009).
 
 Read the invariant table in `ARCHITECTURE.md` §7 through that lens:
 
-| Status                              | Invariants                   |
-| ----------------------------------- | ---------------------------- |
-| Enforced and exercised today        | INV-1, 3, 4, 5, 6, 7, 12, 15 |
-| Rule exists, nothing yet to check   | INV-2, INV-13                |
-| **No enforcement mechanism at all** | INV-8, 9, 10, 11, 14         |
+| Status                                          | Invariants                      |
+| ----------------------------------------------- | ------------------------------- |
+| Enforced and exercised in the TypeScript oracle | INV-1, 3, 4, 5, 6, 7, 15        |
+| Repository dependency audit exists              | INV-12                          |
+| Must be recreated before Dart feature code      | INV-1, 2, 3, 4, 5, 6, 7, 13, 15 |
+| No product implementation exists yet            | INV-8, 9, 10, 11, 14            |
 
-The five unenforced invariants are the ones carrying legal and product risk:
+The five not-yet-implementable invariants are the ones carrying legal and product risk:
 offline playability, SQLite as source of truth, consent gating, no full date of
 birth, and 64×64 touch targets. They are unenforced because the code they guard
 does not exist yet — which is exactly when the check is cheap to write. Phase 0
@@ -75,9 +76,10 @@ Each phase may not start until its measurement exists.
 | **Hit-target test helper**: asserts every interactive child-zone element is ≥64×64                                 | INV-14 |
 | **Accessibility variant renderer**: each primitive rendered in every supported variant                             | §1.5   |
 
-Gate 2 is "sustained 60 fps drag and refill on the reference low-end Android
-device". Today there is neither a harness nor a device. Without the harness, frame
-drops surface during beta, when the fix is architectural rather than local.
+Gate 2 remains "sustained 60 fps drag and refill on both physical Android models
+in the approved managed low-end profile" (ADR-0010). Managed access and a proven
+Macrobenchmark artifact path now exist. Phase 2 must adapt that path to the
+Flutter board scenario before rendering feature code begins.
 
 Twenty primitives times six variants is precisely the surface where a manual
 checklist rots silently.
@@ -103,7 +105,7 @@ substituting for it.
 
 ### Phases 5–6 — integration, beta, launch
 
-`WORKTREE-PLAN.md` §10 already forbids parallelising these. Respect it: once work
+`WORKTREE-PLAN.md` §8 already forbids parallelising these. Respect it: once work
 crosses every boundary, a second agent adds merge surface and review load faster
 than throughput.
 
@@ -111,21 +113,20 @@ than throughput.
 
 ## 4. The critical path is not code
 
-Three of the four open items in `PHASE-0-CHECKLIST.md` are procurement and legal,
-with calendar lead times that working harder does not compress.
+The engineering critical path now sits beside three external review items whose
+calendar lead times working harder does not compress.
 
-| Item                                                              | Blocks                                                  | Risk if late                                                          |
-| ----------------------------------------------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------- |
-| **Reference devices** (~Rs.10k Android, SE-class iPhone)          | ADR-0001 Rive spike → all of Phase 2; and Gate 2 itself | `wt/board` Skia/Reanimated work is unrecoverable if ADR-0001 reverses |
-| **Trademark clearance** ("Poko's World" / "Sumlings", Cl. 9 & 41) | Naming, everywhere                                      | The name is baked into `@poko/*`, the repo and every doc              |
-| **Indian privacy counsel** (DPDP consent flow)                    | Phase 3 schema and Edge Functions                       | Rework of exactly the code that touches children's data               |
-| **Store child-policy review**                                     | Public beta                                             | Late-stage submission rejection                                       |
+| Item                                                              | Blocks                            | Risk if late                                                                               |
+| ----------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------ |
+| **Flutter foundation + Dart parity**                              | All production client work        | A direct feature start could encode behavior that no longer matches the accepted TS oracle |
+| **Trademark clearance** ("Poko's World" / "Sumlings", Cl. 9 & 41) | Naming, everywhere                | The name is baked into `@poko/*`, the repo and every doc                                   |
+| **Indian privacy counsel** (DPDP consent flow)                    | Phase 3 schema and Edge Functions | Rework of exactly the code that touches children's data                                    |
+| **Store child-policy review**                                     | Public beta                       | Late-stage submission rejection                                                            |
 
-All four can start immediately and none require the app to exist. **The device
-order is the single highest-value unblock available**, because Phase 2 is already
-in flight against a decision the spike has not yet confirmed.
-
-Until the spike resolves, hold Phase 2's Skia work at a reversible boundary.
+The managed-device item is resolved and ADR-0011 has exercised the fallback.
+The immediate engineering critical path is the serialized Flutter foundation,
+then cross-language engine parity. Counsel, store-policy and trademark work remain
+external calendar risks and should proceed in parallel.
 
 ---
 
@@ -207,8 +208,10 @@ the one most likely to be forgotten under delivery pressure.
 
 ## 8. Next actions
 
-1. Order the reference devices; open counsel and trademark work in parallel.
-2. Build the Gate 2 frame-timing harness and the hit-target/variant test helpers
-   before further board code lands.
-3. Run the Rive spike the day the Android device arrives; keep Phase 2 reversible
-   until it resolves.
+1. Merge the ADR-0011 Flutter rebaseline and retire/freeze pre-replatform Phase 2
+   worktrees.
+2. Build the serialized Flutter foundation and language-neutral parity contracts.
+3. Port the pure engine to Dart while an independent worktree verifies every
+   golden seed, action trace, serialization fixture and 100,000-state corpus.
+4. Start Flutter board/UI work only after Gate 1F; keep counsel and trademark work
+   moving in parallel.
