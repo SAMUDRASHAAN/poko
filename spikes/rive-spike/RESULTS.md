@@ -2,9 +2,9 @@
 
 |             |                                                                     |
 | ----------- | ------------------------------------------------------------------- |
-| **Status**  | Functional pass run on emulator. **No performance verdict.**        |
+| **Status**  | Provisional physical pass on non-reference hardware. **No ADR verdict.** |
 | **Purpose** | Settle the contingency in ADR-0001                                  |
-| **Updated** | 2026-08-10                                                          |
+| **Updated** | 2026-08-13                                                          |
 
 > **Nothing here is an estimate.** Every row is a reading from a run that actually
 > happened, or is marked not verified with the reason.
@@ -13,9 +13,11 @@
 
 ## Verdict
 
-**Not reached — and cannot be, from this session.** Performance is the question
-ADR-0001 turns on, and performance was not measured. What follows is functional
-evidence only.
+**Not reached.** Performance is the question ADR-0001 turns on. It is now measured
+on physical hardware, but that phone is an 8 GB Snapdragon 695 mid-ranger rather
+than the required 3–4 GB, ~Rs.10k reference device. A failure here would have been
+conclusive; the observed pass is provisional and does not discharge the ADR's
+low-end-device contingency.
 
 ---
 
@@ -206,6 +208,57 @@ conclusion in the first place.
 
 ---
 
+## Run 4 (2026-08-13) — physical release build, provisional performance pass
+
+> ⚠️ **PHYSICAL, BUT NOT THE REFERENCE DEVICE.**
+> This run can conclusively fail the stack, but it cannot conclusively pass it.
+
+The same borrowed input-bearing rig ran in an ARM64 **release** APK on a OnePlus
+CPH2619 (`SM6375`, Snapdragon 695, 7.2 GiB RAM), with the 120 Hz panel forced to
+60 Hz and verified as active mode 2 at 60.000004 Hz. The app rendered three Rive
+instances while each drove `numLook` 0 ↔ 100 every 80 ms.
+
+Android's own `dumpsys gfxinfo` summary supplied the render-thread measurements:
+
+| Load | Frames | Jank | p50 | p90 | p95 | p99 | Worst observed bucket |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Three rigs, sustained 45 s | 2,701 | **0 / 0.00%** | 5 ms | 5 ms | 6 ms | 8 ms | 13 ms |
+| Three rigs + 20-switch burst | 742 | **0 / 0.00%** | 5 ms | 6 ms | 7 ms | 10 ms | 14 ms |
+
+The burst completed in 3.3 s, the final readback matched `isHandsUp`, and PID
+`14135` was unchanged. Android reported zero missed vsyncs, zero slow UI-thread
+frames, zero slow draw-command frames and zero missed frame deadlines in both
+captures. At the end of the run the process used 141,289 KiB total PSS and 60,116
+KiB graphics PSS. Battery temperature was 34.4 °C, effectively unchanged from the
+34.3 °C sustained-run reading.
+
+### Compatibility warning found on the physical run
+
+`rive-react-native@9.8.5` is the latest release of the **legacy** runtime. Under
+Expo 57 / React Native 0.86 bridgeless mode it repeatedly calls the deprecated
+`RCTEventEmitter` path from `RiveReactNativeView.onPlay`, producing non-fatal
+`Unhandled SoftException` entries:
+
+```text
+getJSModule(RCTEventEmitter) is not recommended in the new architecture and
+will stop working with interop disabled. Please use UIManagerHelper.getEventDispatcher instead
+```
+
+The app kept rendering at the figures above and produced no fatal exception,
+`viseme.error`, or `setInputState.error`, but this is not a production-clean
+integration. Rive now publishes its new-architecture runtime separately as
+`@rive-app/react-native` (current stable: 0.4.19); the dependency decision should
+evaluate that package instead of promoting the legacy spike dependency unchanged.
+
+### Run 4 conclusion
+
+**Provisional physical pass, final verdict still open.** The runtime drew three
+simultaneous rigs and handled state/input stress comfortably on this device. The
+remaining decision inputs are the actual low-end device result and a clean run of
+the current new-architecture Rive package.
+
+---
+
 ## The strongest result: it builds
 
 `rive-react-native@9.8.5` **compiled and linked against Expo 57 / RN 0.86** with
@@ -253,9 +306,11 @@ its absence for an oversight.
 > | Blocker | Blocks | Owner |
 > | --- | --- | --- |
 > | `assets/poko.riv` does not exist | checks 3 and 5 — **our** state machine | design |
-> | No reference device (~Rs.10k, 3–4 GB class) | the entire performance verdict, and so ADR-0001 | procurement |
+> | No reference device (~Rs.10k, 3–4 GB class) | the final performance verdict, and so ADR-0001 | procurement |
+> | Legacy runtime emits new-architecture soft exceptions | production dependency choice | engineering / ADR |
 >
-> Neither is engineering work. The harness is ready for both.
+> The first two need design/procurement input. The runtime evaluation is the
+> remaining engineering decision, and the physical harness is ready for it.
 
 **No `.riv` rig exists.** This is the single reason checks 2–6 are not green.
 `App.tsx` expects `assets/poko.riv` exporting:
@@ -282,7 +337,7 @@ licence.
 | Build | debug, `-PreactNativeArchitectures=arm64-v8a` |
 | Screen | 1080×2424 |
 
-### Physical device (for the performance session — NOT used here)
+### Physical device (used for Run 4 — provisional only)
 
 | | |
 | --- | --- |
@@ -328,11 +383,13 @@ reporting a missing asset, not a rendering or runtime defect.
 
 ## To resume
 
-1. Supply `assets/poko.riv` (or approve a community rig).
-2. Re-run the emulator pass — checks 2–6 should then resolve, including whether
-   the emulator's translation layer renders Rive at all.
-3. Run the performance session on physical hardware, release build, ideally on the
-   actual low-end reference device.
+1. Obtain the actual 3–4 GB, ~Rs.10k reference Android device and repeat Run 4.
+2. Evaluate `@rive-app/react-native` on the same physical harness before choosing
+   the production dependency; do not carry the legacy runtime's event-emitter
+   warning into the app unnoticed.
+3. Supply `assets/poko.riv` to verify Poko's own state machine and `mouthOpen`
+   input. The borrowed rig is sufficient for runtime performance, not content
+   correctness.
 
 Reproduce from a fresh clone:
 
