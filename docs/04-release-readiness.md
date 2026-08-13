@@ -210,8 +210,9 @@ the one most likely to be forgotten under delivery pressure.
 
 ## 8. Next actions
 
-1. Configure the managed physical-device lab and pin two ADR-0010 profiles; open
-   counsel and trademark work in parallel.
+1. Select a dedicated Google Cloud project, configure billing and Test Lab APIs,
+   then verify both models pinned in `05-managed-device-profile.md`; open counsel
+   and trademark work in parallel.
 2. Build the Gate 2 frame-timing harness and the hit-target/variant test helpers
    before further board code lands.
 3. Run the Rive spike when the managed profiles are available; keep Phase 2

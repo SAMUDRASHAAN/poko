@@ -50,12 +50,16 @@ exist before the code they guard.
       push is rejected with GH006)
 - [ ] Configure authenticated managed-device-lab access and pin two qualifying
       low-end Android model/API pairs per ADR-0010
+      — **partially complete.** Google Cloud CLI authentication works and
+      `docs/05-managed-device-profile.md` pins Galaxy A03s (`a03su`) and Infinix
+      SMART 8 (`Infinix-X6525`), both API 33 physical ARM64 devices marked
+      `DEVICE_CAPACITY_LOW`. Project selection, billing, and Test Lab APIs remain.
 - [ ] Run the 3-day `rive-react-native` spike (gates ADR-0001)
       — **provisional physical pass, no verdict.** Legacy and Nitro runtimes build,
       render, and survive the stress harness on the available 7.2 GiB Snapdragon
-      695 phone (`spikes/rive-spike/RESULTS.md`). Nitro removes the legacy
-      event-emitter incompatibility, but its sustained p95 reached 17 ms. Repeat
-      on both qualifying managed physical models; a `.riv` rig is still outstanding.
+      695 phone (pending spike PR #20). Nitro removes the legacy event-emitter
+      incompatibility, but its sustained p95 reached 17 ms. Repeat on both
+      qualifying managed physical models; a `.riv` rig is still outstanding.
 - [ ] Book Indian privacy counsel for the DPDP consent flow
 - [ ] Trademark search: "Poko's World" / "Sumlings" (Classes 9 and 41)
 - [x] Create the two Phase 1 worktrees
