@@ -320,7 +320,8 @@ Designed for, deliberately absent. Marked here so nobody designs them out by acc
 
 ## 14. Performance budgets
 
-Measured on the reference device (Redmi-class Android, 3–4 GB RAM), not a simulator.
+Measured on two physical phones in the approved managed low-end profile
+(ADR-0010: ARM64, 3–4 GiB RAM, value-class SoC, 60 Hz), never a simulator.
 
 | Budget                    | Target                     |
 | ------------------------- | -------------------------- |

@@ -1,6 +1,7 @@
 # ADR-0001: React Native over Flutter for the client
 
-- **Status:** Accepted, contingent on the Rive spike (see Consequences)
+- **Status:** Accepted, contingent on the Rive spike (see Consequences), with the
+  device gate amended by ADR-0010
 - **Date:** 2026-08-01
 
 ## Context
@@ -27,9 +28,9 @@ Build on React Native + Expo + TypeScript. Board rendering via
 - The web build reuses the same engine and most UI.
 - **Cost, stated honestly:** Rive's React Native runtime is less mature than its
   Flutter runtime, and character animation is central to this product. A 3-day
-  spike on the reference Android device gates this decision. If the spike fails,
-  this ADR is superseded, we move to Flutter, and we lose the shared TS engine
-  and the cheap web build.
+  spike on the approved low-end physical-device profile from ADR-0010 gates this
+  decision. If the spike fails, this ADR is superseded, we move to Flutter, and
+  we lose the shared TS engine and the cheap web build.
 
 ## Alternatives considered
 

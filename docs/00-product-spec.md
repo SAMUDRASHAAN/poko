@@ -116,7 +116,8 @@ v1 is releasable only when:
 
 - all architecture invariants have mechanical enforcement;
 - Gate 1 proves 100,000 generated boards solvable and `analyse()` stays under 5 ms;
-- the reference Android device sustains 60 fps through drag and refill;
+- both physical Android models in the approved managed low-end profile sustain
+  60 fps through drag and refill;
 - a full session works in airplane mode and later syncs exactly once;
 - cross-account RLS attack tests cannot read or mutate another parent's data;
 - a parent completes authentication, consent, and child setup unaided in under three minutes;

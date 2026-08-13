@@ -75,9 +75,11 @@ Each phase may not start until its measurement exists.
 | **Hit-target test helper**: asserts every interactive child-zone element is ≥64×64                                 | INV-14 |
 | **Accessibility variant renderer**: each primitive rendered in every supported variant                             | §1.5   |
 
-Gate 2 is "sustained 60 fps drag and refill on the reference low-end Android
-device". Today there is neither a harness nor a device. Without the harness, frame
-drops surface during beta, when the fix is architectural rather than local.
+Gate 2 is "sustained 60 fps drag and refill on both physical Android models in the
+approved managed low-end profile" (ADR-0010). The frame-timing parser exists, but
+the mobile benchmark and authenticated managed-device execution still do not.
+Without that path, frame drops surface during beta, when the fix is architectural
+rather than local.
 
 Twenty primitives times six variants is precisely the surface where a manual
 checklist rots silently.
@@ -111,19 +113,20 @@ than throughput.
 
 ## 4. The critical path is not code
 
-Three of the four open items in `PHASE-0-CHECKLIST.md` are procurement and legal,
-with calendar lead times that working harder does not compress.
+Three of the four open items in `PHASE-0-CHECKLIST.md` require external access or
+legal review, with calendar lead times that working harder does not compress.
 
-| Item                                                              | Blocks                                                  | Risk if late                                                          |
-| ----------------------------------------------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------- |
-| **Reference devices** (~Rs.10k Android, SE-class iPhone)          | ADR-0001 Rive spike → all of Phase 2; and Gate 2 itself | `wt/board` Skia/Reanimated work is unrecoverable if ADR-0001 reverses |
-| **Trademark clearance** ("Poko's World" / "Sumlings", Cl. 9 & 41) | Naming, everywhere                                      | The name is baked into `@poko/*`, the repo and every doc              |
-| **Indian privacy counsel** (DPDP consent flow)                    | Phase 3 schema and Edge Functions                       | Rework of exactly the code that touches children's data               |
-| **Store child-policy review**                                     | Public beta                                             | Late-stage submission rejection                                       |
+| Item                                                               | Blocks                                                  | Risk if late                                                          |
+| ------------------------------------------------------------------ | ------------------------------------------------------- | --------------------------------------------------------------------- |
+| **Managed physical-device access** (two ADR-0010 Android profiles) | ADR-0001 Rive spike → all of Phase 2; and Gate 2 itself | `wt/board` Skia/Reanimated work is unrecoverable if ADR-0001 reverses |
+| **Trademark clearance** ("Poko's World" / "Sumlings", Cl. 9 & 41)  | Naming, everywhere                                      | The name is baked into `@poko/*`, the repo and every doc              |
+| **Indian privacy counsel** (DPDP consent flow)                     | Phase 3 schema and Edge Functions                       | Rework of exactly the code that touches children's data               |
+| **Store child-policy review**                                      | Public beta                                             | Late-stage submission rejection                                       |
 
-All four can start immediately and none require the app to exist. **The device
-order is the single highest-value unblock available**, because Phase 2 is already
-in flight against a decision the spike has not yet confirmed.
+All four can start immediately and none require the app to exist.
+**Managed-lab authentication and profile selection are the single highest-value
+unblock available**, because Phase 2 is already in flight against a decision the
+spike has not yet confirmed.
 
 Until the spike resolves, hold Phase 2's Skia work at a reversible boundary.
 
@@ -207,8 +210,9 @@ the one most likely to be forgotten under delivery pressure.
 
 ## 8. Next actions
 
-1. Order the reference devices; open counsel and trademark work in parallel.
+1. Configure the managed physical-device lab and pin two ADR-0010 profiles; open
+   counsel and trademark work in parallel.
 2. Build the Gate 2 frame-timing harness and the hit-target/variant test helpers
    before further board code lands.
-3. Run the Rive spike the day the Android device arrives; keep Phase 2 reversible
-   until it resolves.
+3. Run the Rive spike when the managed profiles are available; keep Phase 2
+   reversible until it resolves.

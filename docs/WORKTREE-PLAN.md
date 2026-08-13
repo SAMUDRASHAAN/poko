@@ -126,7 +126,8 @@ inside the other agent's package.
 
 Board is tightly coupled to engine internals, so it stays with the agent who has that context. `ui` needs only `tokens.ts` and is fully independent.
 
-**Exit gate — GATE 2:** 60 fps sustained drag + refill on the reference Android device.
+**Exit gate — GATE 2:** 60 fps sustained drag + refill on both physical Android
+models in the approved managed low-end profile (ADR-0010).
 
 ---
 

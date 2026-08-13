@@ -91,7 +91,8 @@ serialization.
 - `packages/ui`: §1.5 primitives and accessibility variants;
 - app shell sufficient to run the board performance harness.
 
-**Gate 2:** sustained 60 fps drag and refill on the reference low-end Android device.
+**Gate 2:** sustained 60 fps drag and refill on both physical Android models in
+the approved managed low-end profile (ADR-0010).
 
 ## 5. Phase 3 — screens, persistence, and backend
 
@@ -143,22 +144,22 @@ Phase owner.
 
 ## 10. Verification matrix
 
-| Concern                        | Mechanical check                                       |
-| ------------------------------ | ------------------------------------------------------ |
-| Type safety                    | `pnpm typecheck`                                       |
-| Conventions and invariant bans | `pnpm lint`                                            |
-| Package boundaries             | `pnpm depcruise`                                       |
-| Unit/property coverage         | `pnpm test`                                            |
-| Unused code/dependencies       | `pnpm knip`                                            |
-| Phase 0 aggregate              | `pnpm verify`                                          |
-| Gate 1 aggregate               | `pnpm verify:gate1`                                    |
-| Device interaction             | Detox/physical-device suites added with the mobile app |
-| Data isolation                 | Supabase RLS attack suite added with the API           |
+| Concern                        | Mechanical check                                         |
+| ------------------------------ | -------------------------------------------------------- |
+| Type safety                    | `pnpm typecheck`                                         |
+| Conventions and invariant bans | `pnpm lint`                                              |
+| Package boundaries             | `pnpm depcruise`                                         |
+| Unit/property coverage         | `pnpm test`                                              |
+| Unused code/dependencies       | `pnpm knip`                                              |
+| Phase 0 aggregate              | `pnpm verify`                                            |
+| Gate 1 aggregate               | `pnpm verify:gate1`                                      |
+| Device interaction             | Managed physical-device suites added with the mobile app |
+| Data isolation                 | Supabase RLS attack suite added with the API             |
 
 ## 11. External readiness
 
 Before board/rendering commitment, complete the Rive React Native spike required
-by ADR-0001 on the reference Android device. Before public beta, complete Indian
-privacy counsel review, child/family store-policy review, and trademark clearance.
-These owner actions are tracked outside the code repository and cannot be
-substituted by passing CI.
+by ADR-0001 on the two-model managed physical-device profile defined by ADR-0010.
+Before public beta, complete Indian privacy counsel review, child/family
+store-policy review, and trademark clearance. These owner actions are tracked
+outside the code repository and cannot be substituted by emulator-only CI.

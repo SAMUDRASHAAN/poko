@@ -48,12 +48,14 @@ exist before the code they guard.
 - [x] Configure the remote, push, and enable branch protection on `main`
       — `SAMUDRASHAAN/poko`; `main` requires PRs with `verify` + `commit messages` + `fuzz`, strict, linear history, admin enforcement on (verified: a direct
       push is rejected with GH006)
-- [ ] Order the reference devices (one ~Rs.10k Android, one SE-class iPhone)
+- [ ] Configure authenticated managed-device-lab access and pin two qualifying
+      low-end Android model/API pairs per ADR-0010
 - [ ] Run the 3-day `rive-react-native` spike (gates ADR-0001)
-      — **started, no verdict.** Emulator functional pass done (`spikes/rive-spike`,
-      see `RESULTS.md`): the runtime builds and links against Expo 57 / RN 0.86,
-      which retires the main toolchain risk. Performance is unmeasured and needs
-      physical hardware; a `.riv` rig is still outstanding.
+      — **provisional physical pass, no verdict.** Legacy and Nitro runtimes build,
+      render, and survive the stress harness on the available 7.2 GiB Snapdragon
+      695 phone (`spikes/rive-spike/RESULTS.md`). Nitro removes the legacy
+      event-emitter incompatibility, but its sustained p95 reached 17 ms. Repeat
+      on both qualifying managed physical models; a `.riv` rig is still outstanding.
 - [ ] Book Indian privacy counsel for the DPDP consent flow
 - [ ] Trademark search: "Poko's World" / "Sumlings" (Classes 9 and 41)
 - [x] Create the two Phase 1 worktrees
@@ -76,6 +78,7 @@ Phase 1 may start after the owner-controlled Rive decision and remote/worktree s
 > spike fails, the shared TypeScript engine is lost along with it.
 >
 > Phase 2 does **not** get the same latitude. `wt/board` is Skia and Reanimated, and
-> is discarded outright if ADR-0001 reverses. The reference devices remain the
-> single highest-value unblock: they gate the spike, the spike gates ADR-0001, and
-> ADR-0001 gates whether Phase 2 is React Native at all.
+> is discarded outright if ADR-0001 reverses. Authenticated access to the two-model
+> managed physical-device profile is now the single highest-value unblock: it
+> gates the spike, the spike gates ADR-0001, and ADR-0001 gates whether Phase 2 is
+> React Native at all.
