@@ -67,6 +67,8 @@ export const outline = { standard: 2, strong: 4, focus: 4 } as const;
 
 export const opacity = { full: 1, disabled: 0.48 } as const;
 
+export const icon = { small: 24, medium: 32, large: 48 } as const;
+
 export const type = {
   /** Always the largest type in the app. Never demote it. */
   target: 56,
@@ -116,6 +118,7 @@ export const tokens = {
   radius,
   outline,
   opacity,
+  icon,
   type,
   font,
   touch,
