@@ -17,13 +17,16 @@ ADR or invariant wins and this document must be corrected in the same change.
 
 ## 1. Where the build actually is
 
-Phase 0 and Phase 1 are complete. Gate 1 is green: engine coverage ≥90%, 100,000
-generated boards with zero unsolvable [INV-6], `analyse()` inside its 5 ms budget,
-reducer purity and lossless serialisation proven.
+Phase 0, TypeScript Phase 1, and the serialized Flutter foundation are complete.
+Gate 1 is green: engine coverage ≥90%, 100,000 generated boards with zero
+unsolvable [INV-6], `analyse()` inside its 5 ms budget, reducer purity and lossless
+serialisation proven.
 
-What exists: `packages/engine`, content/client-data references,
-`packages/ui/src/tokens.ts`, verification tools, and retained two-model Rive
-evidence. What does not exist: **the production Flutter workspace and app**.
+What exists: the pinned Flutter workspace and offline shell, Flame/Rive/Drift
+integration, frozen Dart API/`Num`/token surfaces, baseline parity schema, strict
+Dart verification, CI, buildable Android release and Macrobenchmark artifacts,
+the TypeScript oracle, and retained two-model Rive evidence. What does not exist:
+**the implemented Dart engine or cross-language parity corpus**.
 
 The honest reading: the part of the product whose correctness a machine can decide
 is finished. Rendering at 60 fps on low-end Android, offline-first sync, RLS over
@@ -118,15 +121,16 @@ calendar lead times working harder does not compress.
 
 | Item                                                              | Blocks                            | Risk if late                                                                               |
 | ----------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------ |
-| **Flutter foundation + Dart parity**                              | All production client work        | A direct feature start could encode behavior that no longer matches the accepted TS oracle |
+| **Dart engine + independent parity**                              | All production feature work       | A direct feature start could encode behavior that no longer matches the accepted TS oracle |
 | **Trademark clearance** ("Poko's World" / "Sumlings", Cl. 9 & 41) | Naming, everywhere                | The name is baked into `@poko/*`, the repo and every doc                                   |
 | **Indian privacy counsel** (DPDP consent flow)                    | Phase 3 schema and Edge Functions | Rework of exactly the code that touches children's data                                    |
 | **Store child-policy review**                                     | Public beta                       | Late-stage submission rejection                                                            |
 
-The managed-device item is resolved and ADR-0011 has exercised the fallback.
-The immediate engineering critical path is the serialized Flutter foundation,
-then cross-language engine parity. Counsel, store-policy and trademark work remain
-external calendar risks and should proceed in parallel.
+The managed-device item is resolved, ADR-0011 has exercised the fallback, and the
+serialized Flutter foundation is built. The immediate engineering critical path
+is the Dart engine port plus independent cross-language parity. Counsel,
+store-policy and trademark work remain external calendar risks and should proceed
+in parallel.
 
 ---
 
@@ -208,9 +212,10 @@ the one most likely to be forgotten under delivery pressure.
 
 ## 8. Next actions
 
-1. Merge the ADR-0011 Flutter rebaseline and retire/freeze pre-replatform Phase 2
+1. **Completed:** merge the ADR-0011 Flutter rebaseline and freeze the old Phase 2
    worktrees.
-2. Build the serialized Flutter foundation and language-neutral parity contracts.
+2. **Completed:** build the serialized Flutter foundation and baseline
+   language-neutral contract.
 3. Port the pure engine to Dart while an independent worktree verifies every
    golden seed, action trace, serialization fixture and 100,000-state corpus.
 4. Start Flutter board/UI work only after Gate 1F; keep counsel and trademark work

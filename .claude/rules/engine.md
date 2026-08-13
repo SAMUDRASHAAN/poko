@@ -1,27 +1,29 @@
 ---
 paths:
   - 'packages/engine/**/*.ts'
+  - 'flutter/packages/game_engine/**/*.dart'
 ---
 
 # Engine rules
 
-`packages/engine` is the correctness core. Everything here is pure, deterministic
-and headless. [INV-1, INV-5]
+The TypeScript package is the accepted executable oracle; the Dart package is the
+production correctness core. Both are pure, deterministic and headless. [INV-1, INV-5]
 
 ## Absolute
 
-- No imports. Standard library only. Not React, not our other packages, not `node:*`.
-- No `Math.random()`, no `Date.now()`, no `fetch`, no `window`, no `console.log`.
-- Every gameplay value is a `Num`. Never a raw `number`, never a float. [INV-4]
+- TypeScript imports nothing; Dart imports only its own package and implicit Dart core.
+  Neither engine has a runtime dependency or imports Flutter.
+- No `Math.random()`, `Random()`, `Date.now()`, `DateTime.now()`, timers, I/O or network.
+- Every gameplay value is a `Num`. Never a raw float or `double`. [INV-4]
 - Randomness comes from a `Rng` passed in as a parameter, never created ad hoc
   inside a helper — the caller owns the seed.
 
 ## Testing
 
-- `fast-check` property tests are mandatory for `generator`, `solver` and `refill`.
-  Example tests alone do not establish INV-6.
-- Golden-seed tests pin generation output. A changed snapshot means you changed
-  every existing level — that is a breaking change requiring an ADR, not a fix.
+- Seeded property/fuzz tests are mandatory for generator, solver and refill.
+- Dart golden seeds, action traces and serialization must match the versioned
+  `contracts/` fixtures produced by the pinned TS oracle.
+- A changed expected fixture means you changed existing levels and requires an ADR.
 - `analyse()` has a performance assertion: under 5ms on an 8x8 board.
 
 ## Order of construction

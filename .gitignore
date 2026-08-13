@@ -4,6 +4,11 @@ build/
 coverage/
 .turbo/
 .expo/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.idea/
+*.iml
 *.log
 .env
 .env.local

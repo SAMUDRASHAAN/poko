@@ -8,35 +8,44 @@ Read those on demand — do not paste them here.
 
 ## Commands
 
-| Task                                   | Command                          |
-| -------------------------------------- | -------------------------------- |
-| Install                                | `pnpm install --frozen-lockfile` |
-| Typecheck                              | `pnpm typecheck`                 |
-| Lint                                   | `pnpm lint`                      |
-| Formatting                             | `pnpm format:check`              |
-| Architecture boundaries                | `pnpm depcruise`                 |
-| Unit tests                             | `pnpm test`                      |
-| Solvability fuzz gate (Phase 1 onward) | `pnpm fuzz`                      |
-| Dead code                              | `pnpm knip`                      |
-| Phase 0 CI gate                        | `pnpm verify`                    |
-| Gate 1 and later                       | `pnpm verify:gate1`              |
+| Task                                   | Command                                                                                                                                |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Install                                | `pnpm install --frozen-lockfile`                                                                                                       |
+| Typecheck                              | `pnpm typecheck`                                                                                                                       |
+| Lint                                   | `pnpm lint`                                                                                                                            |
+| Formatting                             | `pnpm format:check`                                                                                                                    |
+| Architecture boundaries                | `pnpm depcruise`                                                                                                                       |
+| Unit tests                             | `pnpm test`                                                                                                                            |
+| Solvability fuzz gate (Phase 1 onward) | `pnpm fuzz`                                                                                                                            |
+| Dead code                              | `pnpm knip`                                                                                                                            |
+| Phase 0 CI gate                        | `pnpm verify`                                                                                                                          |
+| Gate 1 and later                       | `pnpm verify:gate1`                                                                                                                    |
+| Flutter locked install                 | `cd flutter && flutter pub get --enforce-lockfile`                                                                                     |
+| Flutter format/analyze/audit/tests     | `cd flutter && dart run tool/verify_workspace.dart`                                                                                    |
+| Flutter Android release                | `cd flutter/apps/mobile && flutter build apk --release --target-platform android-arm64 --split-per-abi`                                |
+| Android benchmark APKs                 | `cd flutter/apps/mobile/android && ./gradlew :app:assembleBenchmark :macrobenchmark:assembleBenchmark -Ptarget-platform=android-arm64` |
 
 Scope commands to one package while working: `pnpm turbo run test --filter=@poko/engine`.
 
 ## Non-negotiable rules
 
-1. Game logic lives in `packages/engine`. Never in components, stores, hooks or screens.
-2. `packages/engine` imports nothing — not React, not React Native, not our other packages,
-   no npm runtime dependency. Standard library only. [INV-1]
-3. All randomness goes through `rng.ts` with an explicit seed. Never `Math.random()`. [INV-3]
-4. Gameplay values use the `Num` type from `num.ts`. Never a raw `number`, never a float. [INV-4]
-5. Colours, spacing, radii and font sizes come from `packages/ui/src/tokens.ts`.
-   No hex literals, no magic numbers in styles. [INV-13]
+1. Production game logic lives in `flutter/packages/game_engine`; the retained
+   `packages/engine` is its executable TypeScript oracle. Never put rules in widgets,
+   controllers, stores or screens.
+2. Both engines have zero runtime dependencies. Dart engine code may import Dart core
+   implicitly and its own package only; TypeScript engine code imports no package. [INV-1]
+3. All randomness uses an explicit seeded engine RNG. Never `Random()` or `Math.random()`
+   at a call site. [INV-3]
+4. Gameplay values use the engine `Num` type, never `double`, raw float arithmetic or
+   a UI number. [INV-4]
+5. Production visual values come from
+   `flutter/packages/design_system/lib/src/tokens.dart`; the TypeScript token file is
+   the frozen migration oracle. No colour or magic style literals elsewhere. [INV-13]
 6. `dispatch(state, action)` is a pure reducer. No I/O, no `Date.now()`, no mutation. [INV-5]
 7. Child-zone code never touches the network, ads, external links, or third-party analytics. [INV-12]
 8. Never store a child's full date of birth. Birth **year** only. [INV-11]
-9. Import from a package root (`@poko/engine`), never a deep path (`@poko/engine/src/solver`).
-10. Minimum touch target in the child zone is 64x64 px. [INV-14]
+9. Import another package from its public root, never its `src/` path.
+10. Minimum touch target in the child zone is 64×64 logical pixels. [INV-14]
 
 ## Frozen contract
 
@@ -45,14 +54,19 @@ These files are frozen. Changing them requires an ADR and a sync point across wo
 - `packages/engine/src/types.ts`
 - `packages/engine/src/index.ts` (signatures)
 - `packages/ui/src/tokens.ts`
+- `flutter/packages/game_engine/lib/poko_game_engine.dart`
+- `flutter/packages/game_engine/lib/src/{api,num,types}.dart`
+- `flutter/packages/design_system/lib/src/tokens.dart`
+- `contracts/schema/**`
 
 Additions to `tokens.ts` are allowed. Changes to existing tokens are not.
 
 ## Definition of done
 
-A Phase 0 task is done when `pnpm verify` is green:
-typecheck, lint, formatting, depcruise, tests, coverage >=90% on implemented engine code, knip.
-From Gate 1 onward, `pnpm verify:gate1` additionally requires the 100k-board fuzz gate.
+A foundation task is done only when `pnpm verify:gate1` and
+`cd flutter && dart run tool/verify_workspace.dart` are green, plus the relevant
+Android artifact builds. Gate 1F additionally requires cross-language parity, Dart
+coverage >=90%, and the 100k-state Dart fuzz gate.
 
 Not "it works on my machine". Not "tests are mostly passing".
 
@@ -66,8 +80,8 @@ Not "it works on my machine". Not "tests are mostly passing".
 - Write the failing test first, then make it green.
 - Small commits, conventional format: `feat(engine): add chain extension guard`.
 - Never add a dependency without an ADR. `packages/engine` accepts none, ever.
-- Never edit `package.json`, `pnpm-lock.yaml`, `AGENTS.md`, `.claude/rules/**` or CI config
-  without being asked. Propose the change instead.
+- Never edit dependency manifests, lockfiles, agent rules or CI unless your task owns
+  that shared surface. Every new third-party dependency requires an ADR.
 - If two rules conflict, stop and ask. Do not pick one.
 - If you are about to create a new top-level folder, stop. Consult `ARCHITECTURE.md` section 6.
 
@@ -80,8 +94,10 @@ Consult `ARCHITECTURE.md` section 6 for the full table. The heuristic:
 
 ## Testing
 
-- Engine: unit tests for every branch, plus property tests with `fast-check` for
-  generator, solver, refill. Examples alone are not sufficient for those three.
+- Engines: unit tests for every branch, plus seeded property/fuzz tests for generator,
+  solver and refill. Examples alone are not sufficient for those three.
+- Until Gate 1F, every Dart result must match the language-neutral fixtures exported
+  from the pinned TypeScript oracle; do not rewrite expected fixtures to make a port pass.
 - Golden-seed snapshots guard determinism. If a snapshot changes, you changed board
   generation for every existing level — that is a breaking change, not a fix.
 - Components: render in all accessibility variants.

@@ -1,0 +1,16 @@
+name: poko_flutter_workspace
+description: Poko's World Flutter workspace.
+publish_to: none
+
+environment:
+  sdk: ^3.12.2
+
+workspace:
+  - apps/mobile
+  - packages/game_engine
+  - packages/content
+  - packages/design_system
+  - packages/client_data
+
+dev_dependencies:
+  flutter_lints: 6.0.0
