@@ -1,6 +1,8 @@
 # ADR-0002: The game engine is pure TypeScript with zero dependencies
 
-- **Status:** Accepted
+- **Status:** Accepted for the behavioural oracle; superseded for the production
+  client runtime by ADR-0011
+- **Amended:** 2026-08-14
 - **Date:** 2026-08-01
 
 ## Context
@@ -21,12 +23,16 @@ violation fails CI rather than relying on discipline.
 ## Consequences
 
 - 100k-board fuzz runs execute in CI in seconds, with no device or emulator.
-- The identical logic runs in the app, the web build, the levelgen CLI and tests.
+- Before ADR-0011, the identical logic was intended to run in every client. After
+  the Flutter fallback, it runs in tooling and tests and defines the parity
+  fixtures that the pure Dart production engine must match.
 - Scores are verifiable server-side by replaying an action log through the same
   pure reducer.
 - **Cost:** some ceremony. Data must be passed in rather than reached for, and
   the engine cannot log, fetch, or read the clock. Time and randomness are
   parameters. This is the constraint doing its job, not friction to route around.
+- The pure-engine and zero-dependency principles remain accepted for Dart. The
+  TypeScript package itself is no longer a production mobile dependency.
 
 ## Alternatives considered
 

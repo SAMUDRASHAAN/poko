@@ -65,12 +65,13 @@ stack with Profile Select, never an active child game.
 
 ## 4. Visual system
 
-- Every colour, spacing, radius, type size, and duration comes from `@poko/ui`.
+- Every colour, spacing, radius, type size, and duration comes from the Flutter
+  `design_system` token contract.
 - Operation identity is redundant: colour + shape + glyph.
 - Target type is always the largest gameplay type.
-- Board tiles are drawn from a pre-rendered atlas on one Skia canvas.
+- Board tiles are drawn from a pre-rendered atlas in one Flame render surface.
 - Parent screens use `parentTeal`, `parentSlate`, and `parentMist`; child screens use the child palette.
-- Interactive child elements are at least 64×64 px including their hit area.
+- Interactive child elements are at least 64×64 logical pixels including their hit area.
 - Focus, selected, disabled, loading, offline, and error states are visually distinct without relying on colour alone.
 
 ## 5. Accessibility variants

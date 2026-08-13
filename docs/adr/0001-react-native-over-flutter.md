@@ -1,7 +1,7 @@
 # ADR-0001: React Native over Flutter for the client
 
-- **Status:** Accepted, contingent on the Rive spike (see Consequences), with the
-  device gate amended by ADR-0010
+- **Status:** Superseded by ADR-0011 after the managed-device Rive spike failed
+- **Superseded:** 2026-08-14
 - **Date:** 2026-08-01
 
 ## Context
@@ -31,6 +31,8 @@ Build on React Native + Expo + TypeScript. Board rendering via
   spike on the approved low-end physical-device profile from ADR-0010 gates this
   decision. If the spike fails, this ADR is superseded, we move to Flutter, and
   we lose the shared TS engine and the cheap web build.
+- The contingency was exercised on 2026-08-14. Both pinned ADR-0010 models missed
+  the frame budget; see ADR-0011 and `../06-rive-spike-results.md`.
 
 ## Alternatives considered
 

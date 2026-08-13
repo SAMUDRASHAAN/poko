@@ -45,6 +45,25 @@ Rive and Gate 2 are evaluated independently against ADR-0010. Both pinned models
 must pass; replacing a model requires recording the replacement, catalog output,
 hardware evidence, and reason in this file before the run.
 
+## Rive qualification evidence (2026-08-14)
+
+Both pinned models completed the controlled, non-debuggable Nitro Rive workload:
+one warm-up and five measured iterations at verified 60 Hz, with three native
+Rive views, sustained 80 ms numeric-input updates, and twenty 150 ms state
+switches per iteration. Both were functionally stable and below the memory
+ceiling, but both missed the frame budget.
+
+| Model                         | Matrix                 | Frame CPU P95 | Frame overrun P95 |   Peak PSS | Result                 |
+| ----------------------------- | ---------------------- | ------------: | ----------------: | ---------: | ---------------------- |
+| Galaxy A03s (`a03su`, API 33) | `matrix-k6l44ri6iorga` |      19.93 ms |         +18.33 ms | 112,474 KB | ❌ ADR-0001 frame gate |
+| Galaxy A04s (`a04s`, API 34)  | `matrix-22igol2ov72ti` |      18.66 ms |         +19.04 ms | 104,004 KB | ❌ ADR-0001 frame gate |
+
+All ten iteration markers, all ten Perfetto traces, raw benchmark JSON, meminfo,
+logs, exact APKs, device/API identity, and stable per-device PIDs are retained.
+See `06-rive-spike-results.md` for hashes, artifact locations, methodology, and
+the excluded pre-launch runner-configuration failure. ADR-0011 records the
+resulting Flutter decision.
+
 ## Physical smoke evidence (2026-08-14)
 
 These are **functional cloud-path checks, not ADR-0001 or Gate 2 performance
@@ -84,13 +103,15 @@ Retained cloud evidence:
 
 ## Current readiness
 
-| Requirement                    | Status                                |
-| ------------------------------ | ------------------------------------- |
-| Google Cloud CLI installed     | ✅ 580.0.0                            |
-| Google account authenticated   | ✅                                    |
-| Qualification models available | ✅ both currently report low capacity |
-| Dedicated project selected     | ✅ `poko-device-lab-20260814`         |
-| Billing                        | ✅ disabled; Spark path retained      |
-| Testing and Tool Results APIs  | ✅ enabled                            |
-| Physical smoke path            | ✅ both pinned models                 |
-| Release + instrumentation APKs | ⛔ pending serialized mobile scaffold |
+| Requirement                    | Status                                 |
+| ------------------------------ | -------------------------------------- |
+| Google Cloud CLI installed     | ✅ 580.0.0                             |
+| Google account authenticated   | ✅                                     |
+| Qualification models available | ✅ both currently report low capacity  |
+| Dedicated project selected     | ✅ `poko-device-lab-20260814`          |
+| Billing                        | ✅ disabled; Spark path retained       |
+| Testing and Tool Results APIs  | ✅ enabled                             |
+| Physical smoke path            | ✅ both pinned models                  |
+| Controlled Rive qualification  | ❌ frame gate on both; ADR-0011 active |
+| Exact qualification APKs       | ✅ retained in both cloud result paths |
+| Flutter Gate 2 APKs            | ⛔ Phase 2, after Dart parity          |

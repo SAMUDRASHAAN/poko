@@ -2,6 +2,8 @@
 
 - **Status:** Accepted
 - **Date:** 2026-08-14
+- **Amended:** ADR-0011 changes the client framework; this device/evidence gate
+  remains in force for Flutter Gate 2
 
 ## Context
 
@@ -20,6 +22,10 @@ Managed device labs provide physical phones without requiring the team to buy,
 maintain, or keep one particular model available. Their catalogs change, so the
 gate must define a hardware profile and retained evidence rather than depend on a
 single product name.
+
+ADR-0011 later superseded the React Native client after its controlled Rive
+workload failed this gate on both pinned models. That result changes the client
+implementation, not the representative-device profile or evidence standard.
 
 ## Decision
 
