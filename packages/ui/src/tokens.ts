@@ -50,9 +50,24 @@ export const operationGlyph = {
   wild: '\u2726',
 } as const;
 
+/** Pattern coding used when colour-vision support is enabled. */
+export const operationPattern = {
+  add: 'dots',
+  sub: 'waves',
+  mul: 'crosshatch',
+  div: 'diagonal',
+  wild: 'burst',
+} as const;
+
 export const space = [0, 4, 8, 12, 16, 24, 32, 48, 64] as const;
 
 export const radius = { tile: 8, card: 16, sheet: 24, pill: 999 } as const;
+
+export const outline = { standard: 2, strong: 4, focus: 4 } as const;
+
+export const opacity = { full: 1, disabled: 0.48 } as const;
+
+export const icon = { small: 24, medium: 32, large: 48 } as const;
 
 export const type = {
   /** Always the largest type in the app. Never demote it. */
@@ -84,17 +99,31 @@ export const motion = {
   maxInputBlockMs: 300,
 } as const;
 
+/** Text scaling values exercised by the mandatory accessibility fixtures. */
+export const accessibility = {
+  textScale: {
+    base: 1,
+    large: 1.3,
+    extraLarge: 1.6,
+  },
+} as const;
+
 export const tokens = {
   colour,
   operationColour,
   operationShape,
   operationGlyph,
+  operationPattern,
   space,
   radius,
+  outline,
+  opacity,
+  icon,
   type,
   font,
   touch,
   motion,
+  accessibility,
 } as const;
 
 export type Tokens = typeof tokens;
