@@ -36,9 +36,10 @@ Future<void> main() async {
       'run',
       'tool/verify_contracts.dart',
     ]),
-    VerificationStep('game_engine tests', dart, const <String>[
-      'test',
-    ], workingDirectory: 'packages/game_engine'),
+    VerificationStep('game_engine tests + coverage', dart, const <String>[
+      'run',
+      'tool/verify_engine_coverage.dart',
+    ]),
     VerificationStep('content tests', dart, const <String>[
       'test',
     ], workingDirectory: 'packages/content'),

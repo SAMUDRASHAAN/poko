@@ -22,7 +22,9 @@ Completed and retired:
 - original TypeScript `wt/ui`: reusable token/accessibility work is reference
   material now represented in the frozen Dart token contract;
 - `wt/flutter-foundation`: pinned workspace, package/contract boundaries, CI and
-  Android benchmark host (retire immediately after its green merge).
+  Android benchmark host;
+- `wt/dart-engine`: production Dart engine, merged through PR #24;
+- `wt/parity`: independent fixture and corpus verification, merged through PR #25.
 
 No active feature worktree may start from the pre-ADR-0011 Phase 2 branches.
 
@@ -44,7 +46,7 @@ Its exit requires both pnpm Gate 1 and the empty Flutter workspace green plus
 buildable release/Macrobenchmark APKs. Merge and retire this worktree before
 creating the parallel pair.
 
-## 4. Phase 1F engine + parity — two worktrees
+## 4. Phase 1F engine + parity — completed
 
 | Worktree         | Owns                              | Builds                                                                               |
 | ---------------- | --------------------------------- | ------------------------------------------------------------------------------------ |
@@ -55,10 +57,14 @@ The public Dart contract and parity schema are frozen. `wt/parity` never edits t
 engine; `wt/dart-engine` never rewrites expected fixtures. A required contract
 change stops both worktrees for an ADR and sync point.
 
-**Gate 1F:** `03-build-plan.md` §3.3. Merge both, run the full corpus from main,
-then retire both worktrees.
+Both owning branches merged without crossing their path boundaries. The full
+merged-tree corpus and coverage/performance gates in `03-build-plan.md` §3.3 are
+now permanent CI checks. Both worktrees are retired before Phase 2 begins.
 
 ## 5. Phase 2 board + design system — two worktrees
+
+Create both worktrees only from the green Gate 1F merge commit. Land the
+measurement helpers named in `04-release-readiness.md` before their feature code.
 
 | Worktree           | Owns                                                          | Builds                                                                               |
 | ------------------ | ------------------------------------------------------------- | ------------------------------------------------------------------------------------ |

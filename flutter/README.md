@@ -26,8 +26,17 @@ flutter build apk --release --target-platform android-arm64 --split-per-abi
 ```
 
 The verifier checks formatting, analysis, package boundaries, forbidden SDKs,
-and every Dart/widget test. The TypeScript oracle remains separately gated by
-`pnpm verify:gate1` at the repository root.
+every Dart/widget test, and the game engine's 90% line-coverage floor. The
+TypeScript oracle remains separately gated by `pnpm verify:gate1` at the
+repository root. Gate 1F parity runs from the repository root:
+
+```sh
+pnpm --filter @poko/parity verify
+PARITY_RUNS=100000 pnpm --filter @poko/parity corpus
+```
+
+The full corpus compares canonical TypeScript and Dart outputs, rejects any
+unsolvable state, and enforces Dart `analyse()` P95 below 5 ms.
 
 ## Package boundaries
 

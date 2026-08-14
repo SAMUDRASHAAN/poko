@@ -1,10 +1,10 @@
 # Build plan — Poko's World v1
 
-|                  |                                                                     |
-| ---------------- | ------------------------------------------------------------------- |
-| **Status**       | Canonical implementation inventory; Flutter-rebaselined by ADR-0011 |
-| **Execution**    | Follow `WORKTREE-PLAN.md` for ownership and sequencing              |
-| **Architecture** | Follow `ARCHITECTURE.md`; invariants are release gates              |
+|                  |                                                              |
+| ---------------- | ------------------------------------------------------------ |
+| **Status**       | Gate 1F complete; Phase 2 is the active implementation phase |
+| **Execution**    | Follow `WORKTREE-PLAN.md` for ownership and sequencing       |
+| **Architecture** | Follow `ARCHITECTURE.md`; invariants are release gates       |
 
 ## 1. Completed foundation and oracle
 
@@ -31,7 +31,7 @@ artifacts are in `06-rive-spike-results.md`.
 No React Native scaffold, dependency, Skia renderer, or Reanimated code may be
 merged. Existing spike branches are evidence only.
 
-## 3. Phase 1F — Flutter foundation and engine parity
+## 3. Phase 1F — Flutter foundation and engine parity — complete
 
 ### 3.1 Serialized foundation — complete
 
@@ -50,7 +50,7 @@ Every third-party package requires an ADR. ADR-0012 chooses only the minimum
 needed to establish Flutter, Flame, Rive, test infrastructure, local persistence,
 and the app shell; screen/navigation conveniences wait until their phase.
 
-### 3.2 Dart engine port
+### 3.2 Dart engine port — complete
 
 Port behind the frozen Dart surface in dependency order:
 
@@ -66,7 +66,7 @@ The port may read TypeScript source for intent but is judged only by public
 language-neutral fixtures. It must not call Node, JavaScript, FFI, WebView, or a
 network service at runtime.
 
-### 3.3 Independent parity verification
+### 3.3 Independent parity verification — complete
 
 The verification owner expands `contracts/` and `tools/parity` without editing
 the Dart engine. It exports fixtures from the accepted TypeScript oracle and
@@ -77,6 +77,22 @@ analysis, packs, and the 100,000-state corpus.
 engine coverage is at least 90%; 100,000 Dart states have zero unsolvable boards;
 `analyse()` P95 is below 5 ms on the pinned CI runner; serialization is lossless;
 an offline app-shell smoke starts on Android.
+
+These checks are permanent CI gates: the workspace verifier enforces Dart engine
+coverage, `tools/parity` checks all seven public operations and the complete
+seeded corpus, and the release job builds and audits the offline ARM64 Android
+artifact. The TypeScript implementation remains a retained executable oracle;
+production gameplay rules now live in the Dart engine.
+
+Gate closure evidence from the merged Phase 1F tree on 2026-08-14:
+
+- Dart line coverage: 93.22% (1,278/1,371);
+- public parity fixtures: 17/17, zero mismatches;
+- full corpus: 100,000/100,000, zero failures, canonical digest
+  `8af0e008a0454462`, Dart `analyse()` P95 0.044 ms;
+- offline Android emulator cold start: pass, with no `INTERNET` permission and
+  release APK SHA-256
+  `43c90ffcd5952427151d960435f554d65a375d6408c40a34cb6161a65d49c5ac`.
 
 ## 4. Phase 2 — Flutter board renderer and design system
 

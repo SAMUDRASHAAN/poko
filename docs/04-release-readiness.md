@@ -17,16 +17,18 @@ ADR or invariant wins and this document must be corrected in the same change.
 
 ## 1. Where the build actually is
 
-Phase 0, TypeScript Phase 1, and the serialized Flutter foundation are complete.
-Gate 1 is green: engine coverage ≥90%, 100,000 generated boards with zero
-unsolvable [INV-6], `analyse()` inside its 5 ms budget, reducer purity and lossless
-serialisation proven.
+Phase 0, TypeScript Phase 1, and Flutter Phase 1F are complete. Gate 1F is green:
+both engines pass their coverage gates, the 17-case public-API fixture suite and
+100,000-case canonical corpus match, no generated state is unsolvable [INV-6],
+`analyse()` is inside its 5 ms budget, and reducer purity and lossless
+serialisation are proven.
 
 What exists: the pinned Flutter workspace and offline shell, Flame/Rive/Drift
-integration, frozen Dart API/`Num`/token surfaces, baseline parity schema, strict
-Dart verification, CI, buildable Android release and Macrobenchmark artifacts,
-the TypeScript oracle, and retained two-model Rive evidence. What does not exist:
-**the implemented Dart engine or cross-language parity corpus**.
+integration, the production Dart engine, frozen API/`Num`/token surfaces, the
+versioned parity schema and corpus, strict Dart verification, CI, buildable
+Android release and Macrobenchmark artifacts, the retained TypeScript oracle,
+and retained two-model Rive evidence. What does not exist: **the Phase 2 board
+renderer or production design-system widgets**.
 
 The honest reading: the part of the product whose correctness a machine can decide
 is finished. Rendering at 60 fps on low-end Android, offline-first sync, RLS over
@@ -44,12 +46,11 @@ when someone measured it directly (ADR-0009).
 
 Read the invariant table in `ARCHITECTURE.md` §7 through that lens:
 
-| Status                                          | Invariants                      |
-| ----------------------------------------------- | ------------------------------- |
-| Enforced and exercised in the TypeScript oracle | INV-1, 3, 4, 5, 6, 7, 15        |
-| Repository dependency audit exists              | INV-12                          |
-| Must be recreated before Dart feature code      | INV-1, 2, 3, 4, 5, 6, 7, 13, 15 |
-| No product implementation exists yet            | INV-8, 9, 10, 11, 14            |
+| Status                                               | Invariants                  |
+| ---------------------------------------------------- | --------------------------- |
+| Enforced in the production Dart engine and TS oracle | INV-1, 2, 3, 4, 5, 6, 7, 15 |
+| Foundation dependency/token audits exist             | INV-12, 13                  |
+| Awaiting the feature code they guard                 | INV-8, 9, 10, 11, 14        |
 
 The five not-yet-implementable invariants are the ones carrying legal and product risk:
 offline playability, SQLite as source of truth, consent gating, no full date of
@@ -119,18 +120,17 @@ than throughput.
 The engineering critical path now sits beside three external review items whose
 calendar lead times working harder does not compress.
 
-| Item                                                              | Blocks                            | Risk if late                                                                               |
-| ----------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------ |
-| **Dart engine + independent parity**                              | All production feature work       | A direct feature start could encode behavior that no longer matches the accepted TS oracle |
-| **Trademark clearance** ("Poko's World" / "Sumlings", Cl. 9 & 41) | Naming, everywhere                | The name is baked into `@poko/*`, the repo and every doc                                   |
-| **Indian privacy counsel** (DPDP consent flow)                    | Phase 3 schema and Edge Functions | Rework of exactly the code that touches children's data                                    |
-| **Store child-policy review**                                     | Public beta                       | Late-stage submission rejection                                                            |
+| Item                                                              | Blocks                               | Risk if late                                                                               |
+| ----------------------------------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------ |
+| **Phase 2 measurement harnesses**                                 | Board and design-system feature work | Frame, hit-target, and accessibility regressions would otherwise arrive before their gates |
+| **Trademark clearance** ("Poko's World" / "Sumlings", Cl. 9 & 41) | Naming, everywhere                   | The name is baked into `@poko/*`, the repo and every doc                                   |
+| **Indian privacy counsel** (DPDP consent flow)                    | Phase 3 schema and Edge Functions    | Rework of exactly the code that touches children's data                                    |
+| **Store child-policy review**                                     | Public beta                          | Late-stage submission rejection                                                            |
 
-The managed-device item is resolved, ADR-0011 has exercised the fallback, and the
-serialized Flutter foundation is built. The immediate engineering critical path
-is the Dart engine port plus independent cross-language parity. Counsel,
-store-policy and trademark work remain external calendar risks and should proceed
-in parallel.
+The managed-device item is resolved, ADR-0011 has exercised the fallback, and
+Gate 1F is complete. The immediate engineering critical path is the Phase 2
+measurement-first board and design-system work. Counsel, store-policy and
+trademark work remain external calendar risks and should proceed in parallel.
 
 ---
 
@@ -149,6 +149,10 @@ in parallel.
   second on a documentation-only pull request that changed no code. It now asserts
   median and p90 against the 5 ms budget, with the max held to 5× as a pathology
   guard. A regression moves the distribution; a noisy runner moves one sample.
+- **Cross-language parity is blocking.** ✅ The public fixtures run on every
+  Flutter CI job. The full 100,000-case digest simultaneously compares the
+  TypeScript oracle and production Dart engine, rejects unsolvable states, and
+  enforces Dart `analyse()` P95 below 5 ms.
 - **Grow required checks per phase**: device perf at Phase 2, RLS suite at Phase 3,
   difficulty-curve check at Phase 4.
 - **Cross-model review is currently unenforceable.** Both agents authenticate as the
