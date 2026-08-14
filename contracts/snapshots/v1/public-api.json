@@ -1,0 +1,17 @@
+{
+  "schemaSha256": "98eb88df2a7037771a2b2cb0315cde6d76ca16ed1bf9003211a3ef75c97aa70a",
+  "dartContractSha256": {
+    "packages/game_engine/lib/poko_game_engine.dart": "a31569cfe3e0ecc71842827a5123710c2c36e3d58f9e0e1f9cffce99d787eb3c",
+    "packages/game_engine/lib/src/num.dart": "85422c57c6273497897124df540a51d172985027755a80c958033731c5af87a1",
+    "packages/game_engine/lib/src/types.dart": "9d3b8a7b58f8d2506b76656a62e74500f63c9cfa89bda9977ef5dd455f0f61b5"
+  },
+  "apiSignatures": [
+    "LevelState createLevel(int seed, LevelRules rules, BandConfig band)",
+    "LevelState dispatch(LevelState state, GameAction action)",
+    "String serialise(LevelState state)",
+    "LevelState restore(String blob)",
+    "Analysis analyse(Board board, Num target, LevelRules rules)",
+    "List<PuzzleSeed> generatePack(BandId bandId, int count, int seed)",
+    "Mastery updateMastery(Mastery previous, Attempt attempt)"
+  ]
+}
