@@ -13,6 +13,7 @@ void main(List<String> arguments) {
   var hash = _fnvOffset;
   var codeUnits = 0;
   var failures = 0;
+  final analyseMicros = <int>[];
 
   for (var index = 0; index < runs; index += 1) {
     final band = bands[index % bands.length];
@@ -25,7 +26,10 @@ void main(List<String> arguments) {
       }
       final puzzle = pack.first;
       final state = createLevel(puzzle.seed, puzzle.rules, band);
+      final analyseWatch = Stopwatch()..start();
       final analysis = analyse(state.board, state.target, state.rules);
+      analyseWatch.stop();
+      analyseMicros.add(analyseWatch.elapsedMicroseconds);
       if (analysis.solutions.isEmpty || analysis.isStuck) {
         failures += 1;
       }
@@ -44,6 +48,10 @@ void main(List<String> arguments) {
     }
   }
 
+  analyseMicros.sort();
+  final p95Index = ((analyseMicros.length * 95 + 99) ~/ 100) - 1;
+  final analyseP95Micros = analyseMicros.isEmpty ? -1 : analyseMicros[p95Index];
+
   // ignore: avoid_print
   print(
     jsonEncode(<String, Object?>{
@@ -51,6 +59,7 @@ void main(List<String> arguments) {
       'failures': failures,
       'codeUnits': codeUnits,
       'fnv64': hash.toRadixString(16).padLeft(16, '0'),
+      'analyseP95Micros': analyseP95Micros,
     }),
   );
 }

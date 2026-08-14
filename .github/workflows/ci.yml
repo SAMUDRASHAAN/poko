@@ -71,11 +71,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with: { version: 9.12.0 }
+
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: pnpm }
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.44.2'
           channel: stable
           cache: true
+
+      - name: Install parity toolchain
+        run: pnpm install --frozen-lockfile
 
       - name: Resolve locked workspace
         working-directory: flutter
@@ -84,6 +93,14 @@ jobs:
       - name: Analyze, audit, and test
         working-directory: flutter
         run: dart run tool/verify_workspace.dart
+
+      - name: Cross-language fixture parity
+        run: pnpm --filter @poko/parity verify
+
+      - name: Full cross-language corpus and Dart performance
+        env:
+          PARITY_RUNS: '100000'
+        run: pnpm --filter @poko/parity corpus
 
       - name: Build arm64 release APK
         working-directory: flutter/apps/mobile
@@ -112,23 +129,16 @@ jobs:
 
   # INV-6: no generated board may be unsolvable.
   #
-  # This job is a REQUIRED check from Phase 0 onward, but it cannot pass yet:
-  # generator and solver ship as typed stubs that throw NotImplementedError, so
-  # `pnpm fuzz` currently fails on every board. Rather than leave the gate
-  # unwired until someone remembers to turn it on at Gate 1, the job tolerates
-  # exactly one failure mode — NotImplementedError — and blocks on every other.
-  #
-  # The moment Phase 1 replaces those stubs, that failure mode disappears and the
-  # job becomes genuinely blocking with no configuration change. There is no
-  # checklist step to forget.
+  # This job is a REQUIRED check. Phase 1 replaced the typed generator/solver
+  # stubs, so every failure is now blocking.
   fuzz:
     name: fuzz
     runs-on: ubuntu-latest
     timeout-minutes: 20
     # Tiered: a sample on every pull request, the full corpus on main and nightly.
     #
-    # The full 100k run takes ~7 minutes, and it is a required check on every PR.
-    # Paying that on each push makes the gate something people work around rather
+    # The full 100k run takes ~7 minutes. Paying that on each pull-request push
+    # makes the gate something people work around rather
     # than with, and Phase 2 adds a device-performance job on top of it. A 10k
     # sample still catches systematic INV-6 breakage within about a minute; the
     # rare-case coverage moves to main and to the nightly schedule, where a slow
@@ -155,29 +165,12 @@ jobs:
 
       - name: Solvability fuzz gate
         run: |
-          set +e
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             echo "::notice title=Fuzz tier::Sampled tier — $FUZZ_RUNS boards. The full 100k corpus runs on main and nightly."
           else
             echo "Full tier — $FUZZ_RUNS boards."
           fi
-
-          output=$(pnpm fuzz 2>&1)
-          code=$?
-          echo "$output"
-
-          if [ $code -eq 0 ]; then
-            echo "INV-6 holds across the fuzz corpus."
-            exit 0
-          fi
-
-          if echo "$output" | grep -q 'is not implemented yet (Phase 1)'; then
-            echo "::warning title=INV-6 gate pending::generator/solver are still Phase 0 stubs, so the fuzz gate cannot run for real yet. This job starts blocking automatically once they are implemented — no config change needed."
-            exit 0
-          fi
-
-          echo "::error title=INV-6 violation::pnpm fuzz failed for a reason other than an unimplemented stub."
-          exit $code
+          pnpm fuzz
 
   commitlint:
     name: commit messages

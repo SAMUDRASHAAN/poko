@@ -80,9 +80,10 @@ poko/
 ```
 
 `contracts/` and `flutter/` are the only new top-level directories authorized by
-ADR-0011. Until the Dart port passes parity, the TypeScript packages remain the
-source used to generate fixtures. After parity, a separate ADR may retire or
-archive reference implementations; no silent deletion is allowed.
+ADR-0011. Gate 1F parity made the Dart engine production-authoritative. The
+TypeScript packages remain the retained executable oracle used to generate
+fixtures; a separate ADR may retire or archive them, and no silent deletion is
+allowed.
 
 ## 4. Dependency rule
 
@@ -224,7 +225,7 @@ and update mastery. Dart naming may follow language conventions; the
 language-neutral request/response schema in `contracts/` is authoritative for
 cross-language parity.
 
-Before the Dart engine becomes production-authoritative it must match:
+The Dart engine became production-authoritative only after matching:
 
 1. golden seed → board snapshots;
 2. action-log → state snapshots at every step;
@@ -296,4 +297,4 @@ local/dev Supabase project; production credentials never enter development.
 6. Do not delete the TS oracle or reference packages until parity has passed and a
    retirement ADR names what replaces every consumer.
 
-_Last reviewed: ADR-0011 Flutter rebaseline, 2026-08-14._
+_Last reviewed: Gate 1F Dart parity completion, 2026-08-14._

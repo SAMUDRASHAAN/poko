@@ -108,13 +108,21 @@ const dart = await dartComplete;
 if (typescript.failures !== 0 || dart.failures !== 0) {
   throw new Error(`corpus failures: TypeScript=${typescript.failures}, Dart=${dart.failures}`);
 }
-if (JSON.stringify(typescript) !== JSON.stringify(dart)) {
+const { analyseP95Micros, ...dartCorpus } = dart;
+if (!Number.isSafeInteger(analyseP95Micros) || analyseP95Micros < 0) {
+  throw new Error(`invalid Dart analyse P95: ${analyseP95Micros}`);
+}
+if (analyseP95Micros >= 5_000) {
+  throw new Error(`Dart analyse P95 exceeds 5 ms: ${analyseP95Micros / 1_000} ms`);
+}
+if (JSON.stringify(typescript) !== JSON.stringify(dartCorpus)) {
   throw new Error(
-    `100k corpus mismatch:\nTypeScript ${JSON.stringify(typescript)}\nDart ${JSON.stringify(dart)}`,
+    `100k corpus mismatch:\nTypeScript ${JSON.stringify(typescript)}\nDart ${JSON.stringify(dartCorpus)}`,
   );
 }
 
 console.warn(
   `PASS runs=${runs} digest=${typescript.fnv64} code_units=${codeUnits} ` +
+    `dart_analyse_p95_ms=${(analyseP95Micros / 1_000).toFixed(3)} ` +
     `elapsed_s=${((performance.now() - started) / 1000).toFixed(1)}`,
 );
