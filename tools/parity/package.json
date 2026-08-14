@@ -1,0 +1,16 @@
+{
+  "name": "@poko/parity",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "export": "tsx export_oracle.mjs",
+    "verify": "node verify.mjs",
+    "corpus": "tsx corpus.mjs"
+  },
+  "knip": {
+    "entry": [
+      "*.mjs"
+    ]
+  }
+}
