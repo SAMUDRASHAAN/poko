@@ -97,14 +97,27 @@ jobs:
       - name: Cross-language fixture parity
         run: pnpm --filter @poko/parity verify
 
-      - name: Full cross-language corpus and Dart performance
-        env:
-          PARITY_RUNS: '100000'
-        run: pnpm --filter @poko/parity corpus
-
       - name: Build arm64 release APK
         working-directory: flutter/apps/mobile
-        run: flutter build apk --release --target-platform android-arm64 --split-per-abi
+        run: |
+          for attempt in 1 2 3; do
+            set +e
+            output=$(flutter build apk --release --target-platform android-arm64 --split-per-abi 2>&1)
+            code=$?
+            set -e
+            echo "$output"
+
+            if [ $code -eq 0 ]; then
+              break
+            fi
+            if [ $attempt -eq 3 ] || ! echo "$output" | grep -q 'error while downloading artifacts from the network'; then
+              exit $code
+            fi
+
+            delay=$((attempt * 10))
+            echo "::warning title=Gradle download retry::Artifact download failed; retrying in ${delay}s (attempt $((attempt + 1))/3)."
+            sleep "$delay"
+          done
 
       - name: Audit offline arm64 artifact
         working-directory: flutter/apps/mobile
@@ -126,6 +139,11 @@ jobs:
         run: >-
           ./gradlew :app:assembleBenchmark :macrobenchmark:assembleBenchmark
           -Ptarget-platform=android-arm64
+
+      - name: Full cross-language corpus and Dart performance
+        env:
+          PARITY_RUNS: '100000'
+        run: pnpm --filter @poko/parity corpus
 
   # INV-6: no generated board may be unsolvable.
   #
