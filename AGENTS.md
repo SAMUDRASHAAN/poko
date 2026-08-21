@@ -79,6 +79,18 @@ Not "it works on my machine". Not "tests are mostly passing".
   and reviewers cannot tell which they are reading.
 - Write the failing test first, then make it green.
 - Small commits, conventional format: `feat(engine): add chain extension guard`.
+- **Agents do not merge.** Take the work to a green PR, say plainly that it is ready,
+  and stop. A human lands it. This covers docs-only and test-only PRs too — those
+  especially. Green CI is not the bar it looks like: in a test-only PR the thing being
+  changed _is_ the detector, so lowering a threshold, widening a tolerance or deleting
+  a sweep passes by construction. This repo has shipped that exact failure twice —
+  decoy quality was specified in three documents and violated for an entire phase, and
+  `band.maxSolutions` was breached on 96.7% of sprout boards for the project's whole
+  life. CI was green throughout both.
+- Permission to merge is never inherited. Being told to merge one PR, or watching a
+  human merge a run of them, authorises nothing afterwards. Absent an instruction about
+  the PR in front of you, you do not merge it — "this is how we have been doing it" is
+  not an instruction.
 - Never add a dependency without an ADR. `packages/engine` accepts none, ever.
 - Never edit dependency manifests, lockfiles, agent rules or CI unless your task owns
   that shared surface. Every new third-party dependency requires an ADR.
