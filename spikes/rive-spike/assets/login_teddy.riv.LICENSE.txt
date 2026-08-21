@@ -1,0 +1,8 @@
+Rive Community "animated login screen" (teddy).
+Source: https://public.rive.app/community/runtime-files/2244-4463-animated-login-screen.riv
+Licence: CC BY 4.0 - https://creativecommons.org/licenses/by/4.0/
+Credit: Rive Community.
+
+Borrowed for the ADR-0001 spike only. Not Poko artwork.
+Canonical copy lives here; android/app/src/main/res/raw/ is a build-time copy
+and is regenerated/wiped by `expo prebuild`.

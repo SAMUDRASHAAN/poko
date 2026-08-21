@@ -21,16 +21,148 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Rive, { Alignment, Fit, type RiveRef } from 'rive-react-native';
 
-/** Must match the state machine exported in the .riv file. */
-const STATE_MACHINE = 'State Machine 1';
+/**
+ * Which rig the harness drives.
+ *
+ * Every rig-specific name lives in this one object. The first version hardcoded
+ * Poko's names throughout, which meant the spike could not run against ANY file
+ * except one that did not exist yet — so a blocker on unpublished character art
+ * was also blocking the question ADR-0001 actually turns on, which is whether the
+ * runtime holds frame rate at all. Any rig answers that; only Poko's rig answers
+ * whether OUR state machine drives correctly. Separating them costs one object.
+ *
+ * `source` is either a bundled asset or a URL, matching the two forms
+ * `rive-react-native` accepts. A URL avoids committing a binary to the repo,
+ * which is the lighter option for a rig we are only borrowing.
+ *
+ * `attribution` is not decoration. Rive Community files are CC BY 4.0, which
+ * requires credit; recording it next to the file it applies to is the only way it
+ * survives to whoever reads RESULTS.md later.
+ */
+type RigDescriptor = {
+  readonly label: string;
+  readonly source: { readonly resourceName: string } | { readonly url: string };
+  /**
+   * Used only if the primary source fails to load. A bundled rig makes the APK
+   * runnable with no network; the URL is the safety net for a build where the raw
+   * resource did not make it in — `expo prebuild` regenerates `android/` and wipes
+   * `res/raw`, which is exactly the kind of silent loss worth surviving.
+   */
+  readonly fallbackUrl?: string;
+  /** Some files export several artboards; omitted means the file's default. */
+  readonly artboard?: string;
+  /**
+   * Omitted means "let the file pick", and `rive.play` then REPORTS the name it
+   * chose. That is the discovery path for a borrowed file whose state machine name
+   * is not documented — guessing it wrong fails the load outright.
+   */
+  readonly stateMachine?: string;
+  /**
+   * Input names to probe at startup. `getBooleanState`/`getNumberState` resolve to
+   * null for an input that does not exist, so this reports which of a candidate
+   * list the file ACTUALLY exposes instead of trusting documentation.
+   */
+  readonly probeInputs?: readonly string[];
+  /** Boolean inputs, one per state. Set true one at a time, others false. */
+  readonly states: readonly string[];
+  /** Input toggled rapidly as a lip-sync proxy; null if the rig has none. */
+  readonly viseme: { readonly name: string; readonly kind: 'boolean' | 'number' } | null;
+  /** Required credit for a borrowed rig; empty for our own. */
+  readonly attribution: string;
+};
 
-/** Named states the rig exposes, switched from React state. */
-const STATES = ['idle-float', 'happy', 'thinking', 'celebrating'] as const;
-type RigState = (typeof STATES)[number];
+/**
+ * Poko's own rig. Not yet authored — kept here as the target configuration so the
+ * swap back is a one-line change once `assets/poko.riv` exists.
+ */
+const POKO_RIG: RigDescriptor = {
+  label: 'poko',
+  source: { resourceName: 'poko' },
+  stateMachine: 'State Machine 1',
+  states: ['idle-float', 'happy', 'thinking', 'celebrating'],
+  viseme: { name: 'mouthOpen', kind: 'boolean' },
+  attribution: '',
+};
 
-/** Boolean input driven rapidly as a lip-sync proxy. */
-const VISEME_INPUT = 'mouthOpen';
+/**
+ * A rig with INPUTS, to reach checks 3 and 5.
+ *
+ * Nothing measured with a borrowed rig describes Poko's rig, and no number taken
+ * from one belongs in a performance verdict.
+ *
+ * The emoji rig settled that the runtime draws and animates, but it exposed no
+ * documented inputs, so state switching and the rapid toggle stayed unverified.
+ * This one is widely documented as carrying `isChecking`, `isHandsUp` and
+ * `numLook` — but documentation is not evidence, so `probeInputs` checks each name
+ * against the loaded file and the run reports which ones are real.
+ *
+ * `stateMachine` is deliberately omitted: naming it wrong fails the load, and
+ * `rive.play` reports the name the file actually chose.
+ */
+const BORROWED_RIG: RigDescriptor = {
+  label: 'rive-community-animated-login',
+  // Bundled: android/app/src/main/res/raw/login_teddy.riv, copied from
+  // assets/login_teddy.riv (the canonical copy, with its licence beside it).
+  source: { resourceName: 'login_teddy' },
+  fallbackUrl:
+    'https://public.rive.app/community/runtime-files/2244-4463-animated-login-screen.riv',
+  // Discovered from `rive.play`, not guessed: the run reported "Login Machine".
+  stateMachine: 'Login Machine',
+  // Confirmed present by the probe: both booleans read back false on a fresh load.
+  states: ['isChecking', 'isHandsUp'],
+  // Confirmed present as a NUMBER, so the rapid toggle drives 0/100 rather than a bool.
+  viseme: { name: 'numLook', kind: 'number' },
+  probeInputs: ['isChecking', 'isHandsUp', 'numLook', 'trigSuccess', 'trigFail'],
+  attribution: 'Rive Community, CC BY 4.0 — https://creativecommons.org/licenses/by/4.0/',
+};
+
+/** Settled that the emulator renders and animates Rive; no usable inputs. */
+const EMOJI_RIG: RigDescriptor = {
+  label: 'rive-animated-emojis',
+  source: { url: 'https://static.rive.app/rivs/rives_animated_emojis.riv' },
+  artboard: 'Emoji_package',
+  stateMachine: 'State Machine 1',
+  states: [],
+  viseme: null,
+  attribution: 'Rive (static.rive.app), CC BY 4.0 — https://creativecommons.org/licenses/by/4.0/',
+};
+void EMOJI_RIG;
+
+/**
+ * First borrowed rig tried, kept for the record.
+ *
+ * It loaded and drew, but its stage was byte-identical across five frames over
+ * 3.5s — it is a REDUCED-MOTION demo, so a still frame is plausibly what it is
+ * demonstrating, and it cannot distinguish "the runtime animates" from "the
+ * runtime drew once and stopped". Emulator animation scales were confirmed normal
+ * (window/transition = 1.0), so the stillness was not the OS suppressing motion.
+ * A poor instrument for the question, not a Rive failure.
+ */
+const FIRST_BORROWED_RIG: RigDescriptor = {
+  label: 'rive-accessibility-reduced-motion',
+  source: { url: 'https://static.rive.app/rivs/accessibility_reduced_motion.riv' },
+  stateMachine: 'State Machine 1',
+  states: [],
+  viseme: null,
+  attribution: 'Rive (static.rive.app), CC BY 4.0 — https://creativecommons.org/licenses/by/4.0/',
+};
+void FIRST_BORROWED_RIG;
+
+const RIG: RigDescriptor = BORROWED_RIG;
+
+// Referenced so the target configuration cannot rot unnoticed while it is unused.
+void POKO_RIG;
+
+type RigState = string;
+
 const VISEME_INTERVAL_MS = 80;
+
+/** Settling time before reading an input back; see `state.readback`. */
+const READBACK_SETTLE_MS = 250;
+
+/** Number-input rigs get an on/off pair rather than a boolean. */
+const VISEME_NUMBER_ON = 100;
+const VISEME_NUMBER_OFF = 0;
 
 function log(event: string, data: Record<string, unknown> = {}): void {
   console.log(`SPIKE|${JSON.stringify({ t: Date.now(), event, ...data })}`);
@@ -70,27 +202,106 @@ function describeError(error: unknown): string {
 /** One rig instance. `index` distinguishes instances in the stress case. */
 function Rig({ index, state }: { index: number; state: RigState }) {
   const riveRef = useRef<RiveRef>(null);
+  const [usingFallback, setUsingFallback] = useState(false);
+  const source = usingFallback && RIG.fallbackUrl ? { url: RIG.fallbackUrl } : RIG.source;
 
   // Drive the named state from React state, so a switch is a genuine
   // React render -> native bridge hop, which is what the product would do.
   useEffect(() => {
-    for (const candidate of STATES) {
-      try {
-        riveRef.current?.setInputState(STATE_MACHINE, candidate, candidate === state);
-      } catch (error) {
-        log('setInputState.error', { index, candidate, message: describeError(error) });
+    const machine = RIG.stateMachine;
+    if (machine) {
+      for (const candidate of RIG.states) {
+        try {
+          riveRef.current?.setInputState(machine, candidate, candidate === state);
+        } catch (error) {
+          log('setInputState.error', { index, candidate, message: describeError(error) });
+        }
       }
     }
     log('state.applied', { index, state });
+
+    /**
+     * Read the inputs back after setting them.
+     *
+     * "setInputState did not throw" is not evidence the state changed — the call
+     * is fire-and-forget across the bridge, and a wrong input name is silently
+     * accepted. Reading the value back is the difference between check 3 being
+     * verified and merely being attempted.
+     */
+    if (machine && RIG.states.length > 0 && index === 0) {
+      void (async () => {
+        // Wait before reading. `setInputState` is fire-and-forget across the
+        // bridge and the getters are async, so an immediate read returns the
+        // PREVIOUS value — measured, not assumed: without this delay every
+        // readback lagged the state by exactly one transition, which looks like a
+        // failure and is actually a race in the instrument.
+        await new Promise((resolve) => setTimeout(resolve, READBACK_SETTLE_MS));
+
+        const readback: Record<string, boolean | null> = {};
+        for (const candidate of RIG.states) {
+          readback[candidate] = (await riveRef.current?.getBooleanState(candidate)) ?? null;
+        }
+        const expected = Object.fromEntries(RIG.states.map((s) => [s, s === state]));
+        const matches = RIG.states.every((s) => readback[s] === expected[s]);
+        log('state.readback', { index, state, readback, expected, matches });
+      })();
+    }
   }, [state, index]);
 
-  // Viseme proxy: toggle a boolean input rapidly for the whole run.
+  /**
+   * Ask the loaded file which of the candidate inputs exist.
+   *
+   * Both getters resolve to null for an unknown input, so a non-null answer is
+   * positive evidence the input is really there — the difference between "the docs
+   * say isChecking" and "this file has isChecking". Runs once, after a short delay
+   * so the URL fetch and artboard bind have completed.
+   */
   useEffect(() => {
+    const names = RIG.probeInputs;
+    if (!names || names.length === 0 || index !== 0) return;
+
+    const timer = setTimeout(() => {
+      void (async () => {
+        for (const name of names) {
+          try {
+            const asBoolean = await riveRef.current?.getBooleanState(name);
+            const asNumber = await riveRef.current?.getNumberState(name);
+            const kind =
+              asBoolean !== null && asBoolean !== undefined
+                ? 'boolean'
+                : asNumber !== null && asNumber !== undefined
+                  ? 'number'
+                  : 'absent';
+            log('probe.input', { name, kind, boolean: asBoolean ?? null, number: asNumber ?? null });
+          } catch (error) {
+            log('probe.error', { name, message: describeError(error) });
+          }
+        }
+        log('probe.done', { probed: names.length });
+      })();
+    }, 4000);
+
+    return () => clearTimeout(timer);
+  }, [index]);
+
+  // Viseme proxy: toggle one input rapidly for the whole run.
+  useEffect(() => {
+    const viseme = RIG.viseme;
+    if (!viseme) {
+      // Said once, not silently skipped: a rig with no rapid-toggle input leaves
+      // check 5 unverified, and that must be visible in the log, not inferred
+      // from an absence of viseme lines.
+      log('viseme.skipped', { index, reason: 'rig exposes no viseme input' });
+      return;
+    }
+
     let open = false;
     const timer = setInterval(() => {
       open = !open;
       try {
-        riveRef.current?.setInputState(STATE_MACHINE, VISEME_INPUT, open);
+        const value =
+          viseme.kind === 'boolean' ? open : open ? VISEME_NUMBER_ON : VISEME_NUMBER_OFF;
+        if (RIG.stateMachine) riveRef.current?.setInputState(RIG.stateMachine, viseme.name, value);
       } catch (error) {
         log('viseme.error', { index, message: describeError(error) });
       }
@@ -101,20 +312,31 @@ function Rig({ index, state }: { index: number; state: RigState }) {
   return (
     <Rive
       ref={riveRef}
-      resourceName="poko"
-      stateMachineName={STATE_MACHINE}
+      {...source}
+      {...(RIG.artboard ? { artboardName: RIG.artboard } : {})}
+      {...(RIG.stateMachine ? { stateMachineName: RIG.stateMachine } : {})}
       fit={Fit.Contain}
       alignment={Alignment.Center}
       autoplay
       style={styles.rig}
-      onError={(error: unknown) => log('rive.error', { index, message: describeError(error) })}
+      onError={(error: unknown) => {
+        const message = describeError(error);
+        log('rive.error', { index, message, usingFallback });
+        // Only a missing or unreadable FILE justifies switching source. This rig
+        // emits a DataBindingError on every successful load, and falling back on
+        // that would trade a working bundled file for a network fetch every run.
+        if (!usingFallback && RIG.fallbackUrl && /FileNotFound|not found|Unable|Malformed/i.test(message)) {
+          log('rive.fallback', { index, reason: message, to: RIG.fallbackUrl });
+          setUsingFallback(true);
+        }
+      }}
       onPlay={(animation: unknown) => log('rive.play', { index, animation: describeError(animation) })}
     />
   );
 }
 
 export default function App() {
-  const [state, setState] = useState<RigState>('idle-float');
+  const [state, setState] = useState<RigState>(RIG.states[0] ?? '');
   const [stress, setStress] = useState(false);
   const [jsFps, setJsFps] = useState(0);
 
@@ -142,15 +364,31 @@ export default function App() {
     return () => cancelAnimationFrame(raf);
   }, [stress]);
 
+  // Log the rig under test at startup. Which file produced a reading is exactly
+  // the detail that goes missing between a run and the write-up, and a borrowed
+  // rig's numbers must never be filed as if they came from Poko's.
   useEffect(() => {
-    log('app.ready', {});
+    log('app.ready', {
+      rig: RIG.label,
+      source: RIG.source,
+      stateMachine: RIG.stateMachine,
+      states: RIG.states,
+      viseme: RIG.viseme,
+      attribution: RIG.attribution,
+    });
   }, []);
 
   // Tap -> state change. Both timestamps are logged so input-to-animation
   // latency is a subtraction, not an impression.
   const onTapCharacter = useCallback(() => {
     const tappedAt = Date.now();
-    const next = STATES[(STATES.indexOf(state) + 1) % STATES.length] as RigState;
+    if (RIG.states.length === 0) {
+      // Recorded rather than ignored: with no declared states there is nothing to
+      // switch, and check 3 is unverified for this rig — which the log must say.
+      log('tap.noStates', { tappedAt, rig: RIG.label });
+      return;
+    }
+    const next = RIG.states[(RIG.states.indexOf(state) + 1) % RIG.states.length] as RigState;
     log('tap', { tappedAt, from: state, to: next });
     setState(next);
   }, [state]);
@@ -193,7 +431,8 @@ export default function App() {
             // Scripted burst: 20 state switches, for the dropped-frame count.
             log('burst.start', { switches: 20 });
             for (let i = 0; i < 20; i += 1) {
-              setState(STATES[i % STATES.length] as RigState);
+              if (RIG.states.length === 0) break;
+              setState(RIG.states[i % RIG.states.length] as RigState);
               await new Promise((resolve) => setTimeout(resolve, 150));
             }
             log('burst.end', {});
