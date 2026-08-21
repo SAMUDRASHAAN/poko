@@ -42,6 +42,13 @@ import Rive, { Alignment, Fit, type RiveRef } from 'rive-react-native';
 type RigDescriptor = {
   readonly label: string;
   readonly source: { readonly resourceName: string } | { readonly url: string };
+  /**
+   * Used only if the primary source fails to load. A bundled rig makes the APK
+   * runnable with no network; the URL is the safety net for a build where the raw
+   * resource did not make it in — `expo prebuild` regenerates `android/` and wipes
+   * `res/raw`, which is exactly the kind of silent loss worth surviving.
+   */
+  readonly fallbackUrl?: string;
   /** Some files export several artboards; omitted means the file's default. */
   readonly artboard?: string;
   /**
@@ -94,9 +101,11 @@ const POKO_RIG: RigDescriptor = {
  */
 const BORROWED_RIG: RigDescriptor = {
   label: 'rive-community-animated-login',
-  source: {
-    url: 'https://public.rive.app/community/runtime-files/2244-4463-animated-login-screen.riv',
-  },
+  // Bundled: android/app/src/main/res/raw/login_teddy.riv, copied from
+  // assets/login_teddy.riv (the canonical copy, with its licence beside it).
+  source: { resourceName: 'login_teddy' },
+  fallbackUrl:
+    'https://public.rive.app/community/runtime-files/2244-4463-animated-login-screen.riv',
   // Discovered from `rive.play`, not guessed: the run reported "Login Machine".
   stateMachine: 'Login Machine',
   // Confirmed present by the probe: both booleans read back false on a fresh load.
@@ -193,6 +202,8 @@ function describeError(error: unknown): string {
 /** One rig instance. `index` distinguishes instances in the stress case. */
 function Rig({ index, state }: { index: number; state: RigState }) {
   const riveRef = useRef<RiveRef>(null);
+  const [usingFallback, setUsingFallback] = useState(false);
+  const source = usingFallback && RIG.fallbackUrl ? { url: RIG.fallbackUrl } : RIG.source;
 
   // Drive the named state from React state, so a switch is a genuine
   // React render -> native bridge hop, which is what the product would do.
@@ -301,14 +312,24 @@ function Rig({ index, state }: { index: number; state: RigState }) {
   return (
     <Rive
       ref={riveRef}
-      {...RIG.source}
+      {...source}
       {...(RIG.artboard ? { artboardName: RIG.artboard } : {})}
       {...(RIG.stateMachine ? { stateMachineName: RIG.stateMachine } : {})}
       fit={Fit.Contain}
       alignment={Alignment.Center}
       autoplay
       style={styles.rig}
-      onError={(error: unknown) => log('rive.error', { index, message: describeError(error) })}
+      onError={(error: unknown) => {
+        const message = describeError(error);
+        log('rive.error', { index, message, usingFallback });
+        // Only a missing or unreadable FILE justifies switching source. This rig
+        // emits a DataBindingError on every successful load, and falling back on
+        // that would trade a working bundled file for a network fetch every run.
+        if (!usingFallback && RIG.fallbackUrl && /FileNotFound|not found|Unable|Malformed/i.test(message)) {
+          log('rive.fallback', { index, reason: message, to: RIG.fallbackUrl });
+          setUsingFallback(true);
+        }
+      }}
       onPlay={(animation: unknown) => log('rive.play', { index, animation: describeError(animation) })}
     />
   );

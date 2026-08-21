@@ -354,6 +354,66 @@ its absence for an oversight.
 
 ---
 
+## Runnable APK (2026-08-21)
+
+A self-contained release APK, for putting the spike on a real phone without a dev
+server.
+
+| | |
+| --- | --- |
+| Path | `spikes/rive-spike/android/app/build/outputs/apk/release/app-release.apk` |
+| Size | 53.7 MB |
+| ABIs | `arm64-v8a` + `armeabi-v7a` — installs on essentially any current Android |
+| Signing | **debug keystore** (Expo's default for `release`). Fine for sideloading, NOT for distribution |
+| JS | bundled (`assets/index.android.bundle`) — no Metro, no `adb reverse` |
+| Rig | bundled `login_teddy.riv`, with the URL kept as fallback |
+| Runtime | `rive-react-native@9.8.5` — the **legacy** package, same as Run 4 |
+
+> ⚠️ **This APK is the LEGACY runtime.** It carries the deprecated
+> `RCTEventEmitter` path Run 4 documented, and Run 5 concluded the Nitro package is
+> the production-compatible candidate. This build is for putting the spike in
+> someone's hands quickly — it is not a preview of the recommended integration, and
+> installing it settles nothing about the dependency decision.
+
+### Verified running offline
+
+Installed on `emulator-5554` with **airplane mode on** and no Metro process:
+
+- `app.ready` reports `source: {"resourceName":"login_teddy"}` — the bundled file
+- `rive.play` for `Login Machine`; bear renders
+- **0** `rive.fallback` events — it never reached for the network
+- `state.readback` `matches:true`; 0 viseme/input errors
+
+The only error logged is the rig's benign `DataBindingError`, which deliberately does
+**not** trigger the fallback: this rig emits it on every successful load, so falling
+back on it would swap a working bundled file for a network fetch on every run.
+
+### Rebuilding
+
+`android/` is generated and git-ignored, so `expo prebuild` wipes `res/raw`. The
+canonical rig lives in `assets/`; copy it back before building:
+
+```bash
+cd spikes/rive-spike
+mkdir -p android/app/src/main/res/raw
+cp assets/login_teddy.riv android/app/src/main/res/raw/login_teddy.riv
+cd android && ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
+```
+
+If that copy is skipped the app still runs — it logs `rive.fallback` and fetches the
+rig over the network instead. Incremental rebuilds are ~15-30s; only the first cold
+build cost 21m.
+
+### Installing
+
+```bash
+adb install -r spikes/rive-spike/android/app/build/outputs/apk/release/app-release.apk
+```
+
+Or copy the APK to the phone and open it, allowing install from unknown sources.
+
+---
+
 ## Blockers
 
 > **Narrowed on 2026-08-10.** This section described one blocker; it is two, with
